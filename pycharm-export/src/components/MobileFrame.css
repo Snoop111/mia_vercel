@@ -1,0 +1,117 @@
+/* Mobile Frame Component - Exact Figma Replication */
+.mobile-frame {
+  /* Exact mobile viewport dimensions */
+  width: var(--viewport-mobile, 375px);
+  height: 100vh;
+  max-width: 100vw;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  
+  /* Figma frame background */
+  background-color: var(--color-background);
+  
+  /* Mobile-first responsive */
+  box-sizing: border-box;
+}
+
+.mobile-frame__content {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  
+  /* Prevent horizontal scroll */
+  overflow-x: hidden;
+  
+  /* Exact pixel positioning like Figma */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Frame-specific overrides */
+.mobile-frame--1 {
+  /* Frame 1 specific styles */
+}
+
+.mobile-frame--2 {
+  /* Frame 2 specific styles */
+}
+
+.mobile-frame--3 {
+  /* Frame 3 specific styles */
+}
+
+.mobile-frame--4 {
+  /* Frame 4 specific styles */
+}
+
+/* Pixel-perfect positioning utilities */
+.absolute {
+  position: absolute;
+}
+
+.relative {
+  position: relative;
+}
+
+.fixed {
+  position: fixed;
+}
+
+/* Exact spacing from Figma */
+.px-4 { padding-left: var(--space-4); padding-right: var(--space-4); }
+.py-4 { padding-top: var(--space-4); padding-bottom: var(--space-4); }
+.p-4 { padding: var(--space-4); }
+.p-6 { padding: var(--space-6); }
+
+.mx-4 { margin-left: var(--space-4); margin-right: var(--space-4); }
+.my-4 { margin-top: var(--space-4); margin-bottom: var(--space-4); }
+.m-4 { margin: var(--space-4); }
+
+/* Figma-like positioning */
+.top-0 { top: 0; }
+.left-0 { left: 0; }
+.right-0 { right: 0; }
+.bottom-0 { bottom: 0; }
+
+/* Exact widths and heights */
+.w-full { width: 100%; }
+.h-full { height: 100%; }
+.w-screen { width: 100vw; }
+.h-screen { height: 100vh; }
+
+/* Flexbox utilities matching Figma auto-layout */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.flex-row { flex-direction: row; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.justify-start { justify-content: flex-start; }
+.justify-end { justify-content: flex-end; }
+
+/* Gap utilities for exact spacing */
+.gap-1 { gap: var(--space-1); }
+.gap-2 { gap: var(--space-2); }
+.gap-3 { gap: var(--space-3); }
+.gap-4 { gap: var(--space-4); }
+.gap-6 { gap: var(--space-6); }
+.gap-8 { gap: var(--space-8); }
+
+/* Text utilities */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+/* Mobile-specific adjustments */
+@media (max-width: 375px) {
+  .mobile-frame {
+    width: 100vw;
+  }
+}
+
+@media (min-width: 376px) and (max-width: 414px) {
+  .mobile-frame {
+    width: var(--viewport-mobileLarge, 414px);
+  }
+}

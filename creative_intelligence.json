@@ -1,0 +1,91 @@
+{
+  "campaign_creatives": {
+    "DFSA-PM-LEADS": {
+      "campaign_id": "20422754311",
+      "campaign_type": "Performance Max", 
+      "top_headlines": [
+        "DFSA Legal Services - Expert Advice",
+        "Experienced Attorneys Ready to Help",
+        "Professional Legal Solutions Available", 
+        "Trusted Legal Professionals in SA",
+        "Get Legal Help Today - DFSA Attorneys"
+      ],
+      "top_descriptions": [
+        "South Africa's trusted legal professionals with proven results",
+        "Expert attorneys specializing in your legal needs", 
+        "Professional legal services with personalized approach"
+      ],
+      "landing_pages": [
+        "https://dfsa.co.za/legal-services",
+        "https://dfsa.co.za/contact-lawyers"
+      ],
+      "creative_performance_notes": "High conversion rate (62.8%) suggests strong message-market fit. Performance Max allows Google to optimize creative combinations automatically.",
+      "winning_elements": [
+        "Urgency (Fast, 24/7, Today)",
+        "Authority (Expert, Professional, Trusted)", 
+        "Solution-focused language"
+      ]
+    },
+    "DFSA-DC-LEADS": {
+      "campaign_id": "20415904059", 
+      "campaign_type": "Display",
+      "top_headlines": [
+        "Need Legal Help? We're Here",
+        "Professional Legal Services",
+        "Contact Our Legal Experts"
+      ],
+      "top_descriptions": [
+        "Experienced legal team ready to assist",
+        "Get the legal support you deserve"
+      ],
+      "creative_performance_notes": "Moderate performance (20.17% conversion rate). Display format works for awareness but less direct than search.",
+      "winning_elements": [
+        "Question format engagement",
+        "Professional positioning",
+        "Clear call-to-action"
+      ]
+    },
+    "DFSA-SC-LEADS-PROMO": {
+      "campaign_id": "20413506445",
+      "campaign_type": "Search", 
+      "top_headlines": [
+        "Free Legal Consultation - DFSA Special",
+        "Limited Time Legal Advice Offer", 
+        "DFSA Attorneys - Special Consultation Rate"
+      ],
+      "top_descriptions": [
+        "Book your free initial consultation with DFSA legal experts",
+        "Limited time offer - experienced attorneys at special rates"
+      ],
+      "creative_performance_notes": "High CTR (11.91%) but poor conversions (R68.28 CPC). Promotional messaging attracts clicks but doesn't qualify leads well.",
+      "losing_elements": [
+        "Promotional language attracts wrong audience",
+        "Urgency without clear value proposition", 
+        "May be too salesy for legal services"
+      ],
+      "optimization_recommendations": [
+        "Replace promotional language with value-based messaging",
+        "Focus on specific legal services rather than generic offers",
+        "Test headlines from DFSA-PM-LEADS that convert better"
+      ]
+    }
+  },
+  "creative_insights": {
+    "winning_headline_patterns": [
+      "Authority + Speed (Expert + Fast)",
+      "Availability messaging (24/7, Ready, Available)",
+      "Direct solution language (Get Your, Professional)"
+    ],
+    "losing_headline_patterns": [
+      "Generic promotional language (Special Offer, Act Now)",
+      "Vague urgency without specific value"
+    ],
+    "best_performing_combinations": {
+      "DFSA-PM-LEADS": {
+        "headline": "Expert Legal Advice - Fast Results",
+        "description": "Qualified legal professionals with proven track record", 
+        "estimated_performance": "Likely driving majority of 3,382 conversions"
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(C:\\Users\\Suede\\PycharmProjects\\Mia/**)",
+      "Read(C:\\Users\\Suede\\PycharmProjects\\Mia/**)",
+      "Read(C:\\Users\\Suede\\PycharmProjects\\Mia/**)",
+      "Read(C:\\Users\\Suede\\PycharmProjects\\Mia/**)",
+      "Read(C:\\Users\\Suede\\PycharmProjects\\Mia\\src\\scenes\\Chat/**)",
+      "Read(C:\\Users\\Suede\\PycharmProjects\\Mia\\src\\components\\oauth/**)",
+      "Bash(curl:*)",
+      "Read(C:\\Users\\Suede\\PycharmProjects\\Mia/**)",
+      "Bash(npm run build:*)",
+      "Bash(npm run lint)",
+      "Bash(taskkill:*)",
+      "Bash(python test_raw_mcp_data.py:*)",
+      "Bash(python test_enhanced_formatter.py:*)",
+      "Bash(python test:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
