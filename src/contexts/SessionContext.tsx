@@ -5,6 +5,7 @@ export interface AccountMapping {
   name: string
   google_ads_id: string
   ga4_property_id: string
+  meta_ads_id?: string
   business_type: string
   color: string
   display_name: string
@@ -15,9 +16,19 @@ export interface UserProfile {
   email: string
   picture_url: string
   google_user_id: string
+  meta_user_id?: string
 }
 
-export interface SessionState {
+export interface MetaAuthState {
+  isMetaAuthenticated: boolean
+  metaUser: {
+    id: string
+    name: string
+    email?: string
+  } | null
+}
+
+export interface SessionState extends MetaAuthState {
   // Authentication state
   isAuthenticated: boolean
   isLoading: boolean
@@ -39,7 +50,9 @@ export interface SessionState {
 export interface SessionActions {
   // Authentication actions
   login: () => Promise<boolean>
+  loginMeta: () => Promise<boolean>
   logout: () => Promise<void>
+  logoutMeta: () => Promise<void>
 
   // Account selection actions
   selectAccount: (accountId: string) => Promise<boolean>
@@ -49,6 +62,7 @@ export interface SessionActions {
   clearError: () => void
   generateSessionId: () => string
   checkExistingAuth: () => Promise<boolean>
+  checkMetaAuth: () => Promise<boolean>
 }
 
 type SessionContextType = SessionState & SessionActions
@@ -75,7 +89,9 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
     sessionId: null,
     selectedAccount: null,
     availableAccounts: [],
-    error: null
+    error: null,
+    isMetaAuthenticated: false,
+    metaUser: null
   })
 
   // Generate a unique session ID
@@ -383,15 +399,188 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
     return false
   }
 
+  const loginMeta = async (): Promise<boolean> => {
+    setState(prev => ({ ...prev, isLoading: true, error: null }))
+
+    try {
+      // Get Meta auth URL
+      const authUrlResponse = await fetch('/api/oauth/meta/auth-url', {
+        headers: {
+          'X-Session-ID': state.sessionId || ''
+        }
+      })
+
+      if (!authUrlResponse.ok) {
+        throw new Error('Failed to get Meta auth URL')
+      }
+
+      const authData = await authUrlResponse.json()
+
+      // Open popup for OAuth
+      const popup = window.open(
+        authData.auth_url,
+        'meta-oauth',
+        'width=500,height=600,scrollbars=yes,resizable=yes'
+      )
+
+      if (!popup) {
+        throw new Error('Popup blocked. Please allow popups for this site.')
+      }
+
+      // Poll for completion
+      return new Promise((resolve) => {
+        const pollTimer = setInterval(async () => {
+          try {
+            if (popup.closed) {
+              clearInterval(pollTimer)
+
+              // Check Meta auth status
+              const statusResponse = await fetch('/api/oauth/meta/status', {
+                headers: {
+                  'X-Session-ID': state.sessionId || ''
+                }
+              })
+
+              if (statusResponse.ok) {
+                const statusData = await statusResponse.json()
+
+                if (statusData.authenticated) {
+                  setState(prev => ({
+                    ...prev,
+                    isLoading: false,
+                    isMetaAuthenticated: true,
+                    metaUser: {
+                      id: statusData.user_info?.id || '',
+                      name: statusData.user_info?.name || 'Meta User',
+                      email: statusData.user_info?.email
+                    }
+                  }))
+
+                  // Refresh accounts to include Meta accounts
+                  await refreshAccounts()
+                  resolve(true)
+                } else {
+                  setState(prev => ({
+                    ...prev,
+                    isLoading: false,
+                    error: 'Meta authentication failed'
+                  }))
+                  resolve(false)
+                }
+              } else {
+                setState(prev => ({
+                  ...prev,
+                  isLoading: false,
+                  error: 'Failed to verify Meta authentication'
+                }))
+                resolve(false)
+              }
+            }
+          } catch (error) {
+            clearInterval(pollTimer)
+            console.error('[SESSION] Meta auth polling error:', error)
+            setState(prev => ({
+              ...prev,
+              isLoading: false,
+              error: 'Meta authentication failed'
+            }))
+            resolve(false)
+          }
+        }, 1000)
+
+        // Timeout after 5 minutes
+        setTimeout(() => {
+          clearInterval(pollTimer)
+          if (!popup.closed) {
+            popup.close()
+          }
+          setState(prev => ({
+            ...prev,
+            isLoading: false,
+            error: 'Meta authentication timed out'
+          }))
+          resolve(false)
+        }, 300000)
+      })
+    } catch (error) {
+      console.error('[SESSION] Meta login error:', error)
+      setState(prev => ({
+        ...prev,
+        isLoading: false,
+        error: error instanceof Error ? error.message : 'Meta login failed'
+      }))
+      return false
+    }
+  }
+
+  const logoutMeta = async (): Promise<void> => {
+    setState(prev => ({ ...prev, isLoading: true }))
+
+    try {
+      await fetch('/api/oauth/meta/logout', {
+        method: 'POST',
+        headers: {
+          'X-Session-ID': state.sessionId || ''
+        }
+      })
+
+      setState(prev => ({
+        ...prev,
+        isLoading: false,
+        isMetaAuthenticated: false,
+        metaUser: null
+      }))
+    } catch (error) {
+      console.error('[SESSION] Meta logout error:', error)
+      setState(prev => ({
+        ...prev,
+        isLoading: false,
+        error: 'Meta logout failed'
+      }))
+    }
+  }
+
+  const checkMetaAuth = async (): Promise<boolean> => {
+    try {
+      const authResponse = await fetch('/api/oauth/meta/status', {
+        headers: {
+          'X-Session-ID': state.sessionId || ''
+        }
+      })
+
+      if (authResponse.ok) {
+        const authData = await authResponse.json()
+        if (authData.authenticated) {
+          setState(prev => ({
+            ...prev,
+            isMetaAuthenticated: true,
+            metaUser: {
+              id: authData.user_info?.id || '',
+              name: authData.user_info?.name || 'Meta User',
+              email: authData.user_info?.email
+            }
+          }))
+          return true
+        }
+      }
+    } catch (error) {
+      console.error('[SESSION] Error checking existing Meta auth:', error)
+    }
+    return false
+  }
+
   const contextValue: SessionContextType = {
     ...state,
     login,
+    loginMeta,
     logout,
+    logoutMeta,
     selectAccount,
     refreshAccounts,
     clearError,
     generateSessionId,
-    checkExistingAuth
+    checkExistingAuth,
+    checkMetaAuth
   }
 
   return (

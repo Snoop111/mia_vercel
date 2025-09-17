@@ -30,33 +30,36 @@ class SessionService:
             self.db = next(get_db())
         return self.db
     
-    async def create_or_update_user_profile(self, google_user_info: Dict[str, Any]) -> UserProfile:
+    async def create_or_update_user_profile(self, user_info: Dict[str, Any], platform: str = 'google') -> UserProfile:
         """
-        Create new user profile or update existing one from Google OAuth data
+        Create new user profile or update existing one from OAuth data (Google/Meta)
         This survives logout/re-auth cycles
         """
-        google_user_id = google_user_info.get('id')
-        email = google_user_info.get('email')
-        name = google_user_info.get('name')
-        picture_url = google_user_info.get('picture')
-        
+        user_id = user_info.get('id')
+        email = user_info.get('email')
+        name = user_info.get('name')
+        picture_url = user_info.get('picture')
+
+        # Use google_user_id as primary key for both platforms for compatibility
+        # (We maintain the existing field name but store both Google and Meta IDs)
+
         # Check if profile already exists
         db = self.get_db()
         profile = db.query(UserProfile).filter(
-            UserProfile.google_user_id == google_user_id
+            UserProfile.google_user_id == user_id
         ).first()
-        
+
         if profile:
             # Update existing profile
             profile.email = email
             profile.name = name
             profile.picture_url = picture_url
             profile.last_active = datetime.utcnow()
-            print(f"[SESSION] Updated existing profile for {name} ({email})")
+            print(f"[SESSION] Updated existing profile for {name} ({email}) via {platform.title()}")
         else:
             # Create new profile
             profile = UserProfile(
-                google_user_id=google_user_id,
+                google_user_id=user_id,  # Store ID regardless of platform
                 email=email,
                 name=name,
                 picture_url=picture_url,
@@ -65,8 +68,8 @@ class SessionService:
                 favorite_accounts=[]
             )
             self.db.add(profile)
-            print(f"[SESSION] Created new profile for {name} ({email})")
-        
+            print(f"[SESSION] Created new profile for {name} ({email}) via {platform.title()}")
+
         self.db.commit()
         self.db.refresh(profile)
         return profile
@@ -192,6 +195,7 @@ class SessionService:
         session.selected_account_id = account_id
         session.google_ads_id = account_mapping.google_ads_id
         session.ga4_property_id = account_mapping.ga4_property_id
+        session.meta_ads_id = account_mapping.meta_ads_id
         
         # Update user profile preferences
         profile = self.db.query(UserProfile).filter(

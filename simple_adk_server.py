@@ -43,6 +43,7 @@ from backend.services.creative_import import CreativeDataImporter, get_creative_
 # Import modular endpoints
 from backend.endpoints import (
     auth_router,
+    meta_auth_router,
     chat_router,
     creative_router,
     growth_router,
@@ -77,8 +78,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include modular routers - ALL AUTHENTICATION IS HANDLED BY auth_router
+# Include modular routers - AUTHENTICATION IS HANDLED BY auth_router AND meta_auth_router
 app.include_router(auth_router, tags=["auth"])
+app.include_router(meta_auth_router, tags=["meta-auth"])
 app.include_router(chat_router, tags=["chat"])
 app.include_router(creative_router, tags=["creative"])
 app.include_router(growth_router, tags=["growth"])

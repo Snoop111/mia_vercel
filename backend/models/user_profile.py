@@ -57,11 +57,13 @@ class AuthSession(Base):
     # Authentication state
     authenticated = Column(Boolean, default=False)
     logged_out = Column(Boolean, default=False)  # Local logout flag
+    meta_authenticated = Column(Boolean, default=False)  # Meta OAuth authenticated flag
     
     # Account selection for this session
     selected_account_id = Column(String)  # "dfsa", "cherry_time", "onvlee"
     google_ads_id = Column(String)  # Resolved Google Ads account ID
     ga4_property_id = Column(String)  # Resolved GA4 property ID
+    meta_ads_id = Column(String)  # Resolved Meta Ads account ID
     
     # Session timing
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -116,6 +118,7 @@ class AccountMapping(Base):
     # Platform IDs
     google_ads_id = Column(String)  # "7574136388", "8705861821", "7482456286"
     ga4_property_id = Column(String)  # "458016659", "292652926", "428236885"
+    meta_ads_id = Column(String)  # Meta/Facebook ads account ID
     
     # Account metadata
     business_type = Column(String)  # "food", "engineering", "retail"

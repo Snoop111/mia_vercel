@@ -20,16 +20,18 @@ def initialize_account_mappings():
             "account_name": "DFSA - Goodness to Go",
             "google_ads_id": "7574136388",
             "ga4_property_id": "458016659",
+            "meta_ads_id": None,  # To be configured when Meta Ads account is available
             "business_type": "food",
             "sort_order": 1,
             "account_color": "#4CAF50",  # Green
             "default_date_range_days": 30
         },
         {
-            "account_id": "cherry_time", 
+            "account_id": "cherry_time",
             "account_name": "Cherry Time",
             "google_ads_id": "8705861821",
             "ga4_property_id": "292652926",
+            "meta_ads_id": None,  # To be configured when Meta Ads account is available
             "business_type": "food",
             "sort_order": 2,
             "account_color": "#E91E63",  # Pink/Red
@@ -38,8 +40,9 @@ def initialize_account_mappings():
         {
             "account_id": "onvlee",
             "account_name": "Onvlee Engineering",
-            "google_ads_id": "7482456286", 
+            "google_ads_id": "7482456286",
             "ga4_property_id": "428236885",
+            "meta_ads_id": None,  # To be configured when Meta Ads account is available
             "business_type": "engineering",
             "sort_order": 3,
             "account_color": "#2196F3",  # Blue
@@ -92,9 +95,10 @@ def get_account_selection_data():
                 "name": account.account_name,
                 "google_ads_id": account.google_ads_id,
                 "ga4_property_id": account.ga4_property_id,
+                "meta_ads_id": account.meta_ads_id,
                 "business_type": account.business_type,
                 "color": account.account_color,
-                "display_name": f"{account.account_name} • Google Ads: {account.google_ads_id} • GA4: {account.ga4_property_id}"
+                "display_name": f"{account.account_name} • Google Ads: {account.google_ads_id} • GA4: {account.ga4_property_id}" + (f" • Meta Ads: {account.meta_ads_id}" if account.meta_ads_id else "")
             }
             for account in accounts
         ]

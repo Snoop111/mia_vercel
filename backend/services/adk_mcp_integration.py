@@ -952,12 +952,14 @@ Respond conversationally and directly. Focus on actionable insights. Include spe
 
                     account_config = {
                         "google_ads_id": account.google_ads_id,
-                        "ga4_property_id": account.ga4_property_id
+                        "ga4_property_id": account.ga4_property_id,
+                        "meta_ads_id": account.meta_ads_id
                     }
                 finally:
                     db.close()
-                print(f"[DEBUG] Using dynamic account: {focus_account} -> Google Ads {account_config['google_ads_id']}, GA4 {account_config['ga4_property_id']}")
-                
+                meta_info = f", Meta Ads {account_config['meta_ads_id']}" if account_config['meta_ads_id'] else " (no Meta Ads configured)"
+                print(f"[DEBUG] Using dynamic account: {focus_account} -> Google Ads {account_config['google_ads_id']}, GA4 {account_config['ga4_property_id']}{meta_info}")
+
                 data_selections = [
                     {
                         "platform": "google_ads",
@@ -970,6 +972,14 @@ Respond conversationally and directly. Focus on actionable insights. Include spe
                         "date_range": date_range
                     }
                 ]
+
+                # Add Meta ads if configured
+                if account_config["meta_ads_id"]:
+                    data_selections.append({
+                        "platform": "meta_ads",
+                        "account_id": account_config["meta_ads_id"],
+                        "date_range": date_range
+                    })
                 
                 # Use the dynamically authenticated user ID
                 user_id = await self.mcp_client._get_authenticated_user_id()
