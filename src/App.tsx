@@ -12,16 +12,20 @@ import { useSession } from './contexts/SessionContext'
 type AppState = 'video-intro' | 'account-selection' | 'main' | 'growth' | 'improve' | 'fix' | 'creative'
 
 function App() {
-  const { isAuthenticated, selectedAccount, isLoading } = useSession()
+  const { isAuthenticated, isMetaAuthenticated, selectedAccount, isLoading } = useSession()
   const [appState, setAppState] = useState<AppState>('video-intro')
+
+  // Support both Google and Meta authentication
+  const isAnyAuthenticated = isAuthenticated || isMetaAuthenticated
 
   // Debug state changes
   useEffect(() => {
     console.log('[APP-STATE] App state changed to:', appState)
-    console.log('[APP-STATE] isAuthenticated:', isAuthenticated)
+    console.log('[APP-STATE] isAuthenticated (Google):', isAuthenticated)
+    console.log('[APP-STATE] isMetaAuthenticated (Meta):', isMetaAuthenticated)
     console.log('[APP-STATE] selectedAccount:', selectedAccount?.name)
     console.log('[APP-STATE] isLoading:', isLoading)
-  }, [appState, isAuthenticated, selectedAccount, isLoading])
+  }, [appState, isAuthenticated, isMetaAuthenticated, selectedAccount, isLoading])
   const [preloadedData, setPreloadedData] = useState<any>(null) // Store pre-fetched data
 
   // Preload critical images - mobile-optimized approach
@@ -71,15 +75,16 @@ function App() {
       // Don't interfere with manual navigation from other states
       console.log('🎯 [APP] Account selected, transitioning to main app:', selectedAccount.name)
       setAppState('main')
-    } else if (isAuthenticated && !selectedAccount && appState !== 'creative' && appState !== 'growth' && appState !== 'improve' && appState !== 'fix') {
-      // User is authenticated but needs to select an account
+    } else if (isAnyAuthenticated && !selectedAccount && appState !== 'creative' && appState !== 'growth' && appState !== 'improve' && appState !== 'fix') {
+      // User is authenticated (Google OR Meta) but needs to select an account
+      console.log('🔐 [APP] User authenticated, transitioning to account selection')
       setAppState('account-selection')
-    } else if (!isAuthenticated && !selectedAccount && appState !== 'video-intro') {
+    } else if (!isAnyAuthenticated && !selectedAccount && appState !== 'video-intro') {
       // User logged out - reset to video intro
       console.log('🔄 [APP] User logged out, resetting to video intro')
       setAppState('video-intro')
     }
-  }, [isAuthenticated, selectedAccount, isLoading, appState])
+  }, [isAuthenticated, isMetaAuthenticated, selectedAccount, isLoading, appState])
 
   const handleAuthSuccess = () => {
     // This will be triggered by the FigmaLoginModal
@@ -178,7 +183,7 @@ function App() {
             </motion.div>
           )}
           
-          {appState === 'growth' && isAuthenticated && (
+          {appState === 'growth' && isAnyAuthenticated && (
             <motion.div
               key="growth"
               initial={{ opacity: 0, x: 20 }}
@@ -197,7 +202,7 @@ function App() {
             </motion.div>
           )}
 
-          {appState === 'improve' && isAuthenticated && (
+          {appState === 'improve' && isAnyAuthenticated && (
             <motion.div
               key="improve"
               initial={{ opacity: 0, x: 20 }}
@@ -216,7 +221,7 @@ function App() {
             </motion.div>
           )}
 
-          {appState === 'fix' && isAuthenticated && (
+          {appState === 'fix' && isAnyAuthenticated && (
             <motion.div
               key="fix"
               initial={{ opacity: 0, x: 20 }}
@@ -235,7 +240,7 @@ function App() {
             </motion.div>
           )}
 
-          {appState === 'creative' && isAuthenticated && (
+          {appState === 'creative' && isAnyAuthenticated && (
             <motion.div
               key="creative"
               initial={{ opacity: 0, x: 20 }}

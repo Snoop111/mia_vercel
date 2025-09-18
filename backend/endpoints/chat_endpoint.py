@@ -62,10 +62,12 @@ def get_account_context(session_id: str, db: Session) -> Dict[str, Any]:
             "account_name": account.account_name,
             "google_ads_id": account.google_ads_id,
             "ga4_property_id": account.ga4_property_id,
+            "meta_ads_id": account.meta_ads_id,
             "business_type": account.business_type,
             "focus_account": account.account_id,
             "start_date": "2025-08-03",
-            "end_date": "2025-09-02"
+            "end_date": "2025-09-02",
+            "platform_type": "meta" if account.meta_ads_id and not account.google_ads_id else "google"
         }
     except Exception as e:
         print(f"[ACCOUNT-CONTEXT] Error: {e}")
@@ -91,10 +93,12 @@ def get_account_context(session_id: str, db: Session) -> Dict[str, Any]:
             "account_name": account.account_name,
             "google_ads_id": account.google_ads_id,
             "ga4_property_id": account.ga4_property_id,
+            "meta_ads_id": account.meta_ads_id,
             "business_type": account.business_type,
             "focus_account": account.account_id,
             "start_date": "2025-08-03",
-            "end_date": "2025-09-02"
+            "end_date": "2025-09-02",
+            "platform_type": "meta" if account.meta_ads_id and not account.google_ads_id else "google"
         }
 
 def detect_creative_question(user_question):
@@ -230,27 +234,29 @@ async def mia_chat_test(request: MiaChatTestRequest, db: Session = Depends(get_d
     account_context = get_account_context(request.session_id, db)
     
     print(f"[MIA-CHAT-TEST] Question: {request.message}")
-    print(f"[MIA-CHAT-TEST] Using dynamic account: {account_context['account_name']} (Google Ads {account_context['google_ads_id']}, GA4 {account_context['ga4_property_id']})")
+    print(f"[MIA-CHAT-TEST] Using dynamic account: {account_context['account_name']} ({account_context['platform_type'].upper()})")
+    print(f"[MIA-CHAT-TEST] Platform details: Google Ads {account_context['google_ads_id']}, GA4 {account_context['ga4_property_id']}, Meta Ads {account_context['meta_ads_id']}")
     
     try:
         # Get the ADK marketing agent
         agent = await get_adk_marketing_agent()
         
-        # Build MCP request with dynamic account context
+        # Build MCP request with dynamic account context - UNIFIED MCP APPROACH
+        # Use the same MCP pattern that works for Google for both platforms
         user_context = {
-            "user_id": account_context["user_id"],
+            "user_id": account_context["user_id"],  # This ensures MCP gets authenticated user ID
             "focus_account": account_context["focus_account"],
             "start_date": account_context["start_date"],
-            "end_date": account_context["end_date"]
+            "end_date": account_context["end_date"],
+            "card_type": "general",
+            "platform_type": account_context["platform_type"]  # Help MCP know if it's Google/Meta
         }
-        
-        print(f"[MIA-CHAT-TEST] Calling MCP with context: {user_context}")
-        
-        # Get comprehensive insights from MCP (raw data)
-        mcp_result = await agent._execute_tool(
-            {"name": "get_comprehensive_insights"}, 
-            user_context
-        )
+
+        print(f"[MIA-CHAT-TEST] UNIFIED MCP: Using account {account_context['focus_account']} via MCP layer")
+        print(f"[MIA-CHAT-TEST] UNIFIED MCP: Platform type {account_context['platform_type']} will be handled by MCP integration")
+
+        # Use the same analyze_marketing_query method that works for Google
+        mcp_result = await agent.analyze_marketing_query(request.message, user_context)
         
         # BYPASS EXTRACTION - Use direct MCP result parsing for ROAS accuracy
         print(f"[MCP-DIRECT] MCP result type: {type(mcp_result)}")
@@ -260,6 +266,10 @@ async def mia_chat_test(request: MiaChatTestRequest, db: Session = Depends(get_d
         if isinstance(mcp_result, dict) and 'success' in mcp_result and 'individual_insights' in mcp_result:
             real_mcp_data = mcp_result
             print(f"[MCP-DIRECT] SUCCESS: Using direct MCP data structure")
+        elif isinstance(mcp_result, dict) and 'success' in mcp_result and mcp_result['success'] == False:
+            # Handle error case gracefully
+            print(f"[MCP-DIRECT] ERROR: MCP returned error: {mcp_result.get('error', 'Unknown error')}")
+            real_mcp_data = mcp_result
         elif isinstance(mcp_result, dict) and 'result' in mcp_result:
             # Handle JSON-RPC wrapper if present
             mcp_nested = mcp_result['result']
@@ -495,8 +505,34 @@ AD CREATIVE INSIGHTS (YOUR ONLY DATA SOURCE):
 Respond naturally as if speaking to a business owner. Use ONLY the headline data above."""
             
         else:
-            # CAMPAIGN QUESTION: Use only MCP campaign data
-            claude_prompt = f"""You are Mia, a conversational marketing intelligence assistant.
+            # CAMPAIGN QUESTION: Use only MCP campaign data - DUAL PLATFORM SUPPORT
+            if account_context["platform_type"] == "meta":
+                # META PROMPT
+                claude_prompt = f"""You are Mia, a conversational marketing intelligence assistant.
+
+AVAILABLE PLATFORMS: {platforms_list}
+User Question: "{request.message}"
+
+📊 META CAMPAIGNS QUESTION - Using Meta Ads Data Only
+
+🚨 DATA EXTRACTION RULES FOR META QUESTIONS:
+1. NEVER invent numbers - Use ONLY the Meta campaign data provided below
+2. Focus on Meta campaign performance, reach, impressions, spend
+3. Be conversational and professional
+4. DO NOT mention Google Ads specific metrics
+5. Meta campaigns may have different structure than Google Ads
+
+PLATFORM VALIDATION:
+- Available platforms: {platforms_list}
+- If asked about unavailable platforms, respond: "I don't have [platform] data available. I can only analyze data from {platforms_list}."
+
+META CAMPAIGN DATA (YOUR ONLY DATA SOURCE):
+{json.dumps(clean_data if 'clean_data' in locals() else mcp_result, indent=2)}
+
+Respond naturally as if speaking to a business owner. Use ONLY the Meta campaign data above."""
+            else:
+                # GOOGLE PROMPT (existing)
+                claude_prompt = f"""You are Mia, a conversational marketing intelligence assistant.
 
 AVAILABLE PLATFORMS: {platforms_list}
 User Question: "{request.message}"

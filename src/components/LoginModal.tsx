@@ -22,7 +22,7 @@ const LoginModal = ({ onAuthSuccess }: LoginModalProps) => {
       console.log('[AUTH] Starting Google OAuth flow...')
       const response = await fetch('/api/oauth/google/auth-url')
       const data = await response.json()
-      
+
       if (data.success && data.auth_url) {
         // Open OAuth in popup window
         const popup = window.open(
@@ -52,6 +52,35 @@ const LoginModal = ({ onAuthSuccess }: LoginModalProps) => {
       }
     } catch (error) {
       console.error('OAuth error:', error)
+    }
+  }
+
+  const handleMetaAuth = async () => {
+    try {
+      console.log('[AUTH] Starting Meta OAuth flow...')
+
+      // For now, use bypass login since MCP server isn't fully configured
+      console.log('[AUTH] Using Meta bypass login for testing...')
+
+      const sessionId = `session_${Date.now()}`
+      const bypassResponse = await fetch('/api/oauth/meta/bypass-login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Session-ID': sessionId
+        }
+      })
+
+      if (bypassResponse.ok) {
+        const bypassData = await bypassResponse.json()
+        console.log('[AUTH] Meta bypass login successful:', bypassData)
+        onAuthSuccess()
+      } else {
+        throw new Error('Meta authentication failed')
+      }
+    } catch (error) {
+      console.error('Meta OAuth error:', error)
+      alert('Meta authentication failed. Please try again.')
     }
   }
 
@@ -85,13 +114,20 @@ const LoginModal = ({ onAuthSuccess }: LoginModalProps) => {
       >
         {/* Auth Buttons */}
         <div className="flex flex-col gap-3 w-full max-w-[343px] mt-4">
-          {/* Continue with Apple */}
-          <button className="w-full h-[50px] px-[73px] py-3 bg-white rounded-2xl flex justify-center items-center gap-1.5 border border-gray-200">
-            <div className="w-3.5 h-3.5 flex items-center justify-center">
-              <span className="text-black text-lg">🍎</span>
+          {/* Continue with Meta */}
+          <button
+            onClick={handleMetaAuth}
+            className="w-full h-[50px] px-[73px] py-3 bg-white rounded-2xl flex justify-center items-center gap-1.5 border border-gray-200 hover:bg-gray-50 transition-colors"
+          >
+            <div className="w-4 h-4 flex items-center justify-center">
+              <img
+                src="/icons/meta-color.svg"
+                alt="Meta"
+                className="w-4 h-4"
+              />
             </div>
             <span className="text-black text-xl font-normal" style={{ fontFamily: 'SF Pro' }}>
-              Continue with Apple
+              Continue with Meta
             </span>
           </button>
 

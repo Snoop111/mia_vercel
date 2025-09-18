@@ -156,8 +156,8 @@ async def complete_oauth(request: Request):
                 
                 user_info = data['user_info']
         
-        # Create or update user profile
-        profile = await session_service.create_or_update_user_profile(user_info)
+        # Create or update user profile with Google platform identifier
+        profile = await session_service.create_or_update_user_profile(user_info, platform='google')
         
         # Create auth session
         auth_session = session_service.create_auth_session(session_id, profile.google_user_id)

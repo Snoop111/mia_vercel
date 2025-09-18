@@ -981,11 +981,16 @@ Respond conversationally and directly. Focus on actionable insights. Include spe
                         "date_range": date_range
                     })
                 
-                # Use the dynamically authenticated user ID
-                user_id = await self.mcp_client._get_authenticated_user_id()
+                # Use the user ID from user_context (passed from session)
+                user_id = user_context.get('user_id')
                 if not user_id:
-                    print("[ERROR] No authenticated user ID available for comprehensive insights")
-                    return {"error": "No authenticated user", "success": False}
+                    # Fallback to MCP client discovery
+                    user_id = await self.mcp_client._get_authenticated_user_id()
+                    if not user_id:
+                        print("[ERROR] No authenticated user ID available for comprehensive insights")
+                        return {"error": "No authenticated user", "success": False}
+
+                print(f"[DEBUG] Using user ID from context: {user_id}")
                 
                 # Build arguments exactly as shown in Postman format
                 arguments = {

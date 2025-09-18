@@ -207,6 +207,85 @@ async def initialize_account_mappings(db: Session = Depends(get_db)):
         print(f"[ACCOUNT-INIT] Error: {e}")
         return {"success": False, "error": str(e)}
 
+@app.post("/api/accounts/initialize-meta")
+async def initialize_meta_account_mappings(db: Session = Depends(get_db)):
+    """Initialize Meta account mappings based on discovered Meta ad accounts"""
+    try:
+        from backend.models.user_profile import AccountMapping
+
+        # Meta accounts discovered from API
+        meta_accounts = [
+            {
+                "id": "onvlee_meta",
+                "name": "Onvlee (Meta Ads)",
+                "meta_ads_id": "401656817167702",
+                "business_type": "engineering",
+                "color": "#059669"
+            },
+            {
+                "id": "dfsa_meta",
+                "name": "DFSA (Meta Ads)",
+                "meta_ads_id": "1237509046595197",
+                "business_type": "food",
+                "color": "#4F46E5"
+            },
+            {
+                "id": "dutoit_meta",
+                "name": "Dutoit (Meta Ads)",
+                "meta_ads_id": "149638046968103",
+                "business_type": "food",
+                "color": "#DC2626"
+            },
+            {
+                "id": "yourbud_meta",
+                "name": "YourBud (Meta Ads)",
+                "meta_ads_id": "773316628325458",
+                "business_type": "retail",
+                "color": "#10B981"
+            },
+            {
+                "id": "agency_meta",
+                "name": "11&1 Agency (Meta Ads)",
+                "meta_ads_id": "630183442304468",
+                "business_type": "agency",
+                "color": "#8B5CF6"
+            }
+        ]
+
+        created_accounts = []
+        for meta_account in meta_accounts:
+            # Check if account already exists
+            existing = db.query(AccountMapping).filter(
+                AccountMapping.account_id == meta_account["id"]
+            ).first()
+
+            if not existing:
+                account_mapping = AccountMapping(
+                    account_id=meta_account["id"],
+                    account_name=meta_account["name"],
+                    meta_ads_id=meta_account["meta_ads_id"],
+                    business_type=meta_account["business_type"],
+                    is_active=True,
+                    sort_order=len(created_accounts) + 100,  # Start after Google accounts
+                    account_color=meta_account["color"]
+                )
+                db.add(account_mapping)
+                created_accounts.append(meta_account)
+
+        db.commit()
+
+        return {
+            "success": True,
+            "message": f"Meta account mappings initialized: {len(created_accounts)} accounts",
+            "accounts_created": created_accounts,
+            "total_meta_accounts_available": 7
+        }
+
+    except Exception as e:
+        print(f"[META-ACCOUNT-INIT] Error: {e}")
+        db.rollback()
+        return {"success": False, "error": str(e)}
+
 @app.post("/api/mcp/reset-agent")
 async def reset_mcp_agent():
     """Manually reset MCP agent to clear cached sessions (for debugging)"""

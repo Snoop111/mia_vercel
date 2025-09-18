@@ -87,8 +87,8 @@ const FigmaLoginModal = ({ onAuthSuccess }: FigmaLoginModalProps) => {
       console.log('🚀 Login Bypass - creating authenticated session for mobile testing')
 
       try {
-        setIsLoading(true)
-        setLoadingMessage('Creating bypass session...')
+        setIsGoogleLoading(true)
+        setGoogleLoadingMessage('Creating bypass session...')
 
         // Use the SessionContext's session ID for consistency
 
@@ -109,7 +109,7 @@ const FigmaLoginModal = ({ onAuthSuccess }: FigmaLoginModalProps) => {
         const bypassData = await bypassResponse.json()
         console.log('✅ Bypass login successful:', bypassData)
 
-        setLoadingMessage('Session created! Redirecting...')
+        setGoogleLoadingMessage('Session created! Redirecting...')
 
         // Force the SessionContext to check auth status with the bypass session
         // Check authentication status with the bypass session ID
@@ -144,8 +144,8 @@ const FigmaLoginModal = ({ onAuthSuccess }: FigmaLoginModalProps) => {
       } catch (error) {
         console.error('💥 Login bypass failed:', error)
         alert(`Login bypass failed: ${error instanceof Error ? error.message : 'Please try again.'}`)
-        setIsLoading(false)
-        setLoadingMessage('')
+        setIsGoogleLoading(false)
+        setGoogleLoadingMessage('')
       }
     } else {
       console.log(`${method} login not implemented yet`)

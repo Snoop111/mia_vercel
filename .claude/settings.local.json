@@ -113,7 +113,9 @@
       "Bash(git rm:*)",
       "Bash(sudo apt-get install:*)",
       "Bash(cmd //c:*)",
-      "WebFetch(domain:www.webmproject.org)"
+      "WebFetch(domain:www.webmproject.org)",
+      "WebFetch(domain:developers.facebook.com)",
+      "Bash(echo:*)"
     ],
     "deny": [],
     "ask": []

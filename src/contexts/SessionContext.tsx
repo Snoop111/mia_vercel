@@ -445,20 +445,39 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
                 const statusData = await statusResponse.json()
 
                 if (statusData.authenticated) {
-                  setState(prev => ({
-                    ...prev,
-                    isLoading: false,
-                    isMetaAuthenticated: true,
-                    metaUser: {
-                      id: statusData.user_info?.id || '',
-                      name: statusData.user_info?.name || 'Meta User',
-                      email: statusData.user_info?.email
+                  // Complete Meta OAuth flow - create database session
+                  const completeResponse = await fetch('/api/oauth/meta/complete', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'X-Session-ID': state.sessionId || ''
                     }
-                  }))
+                  })
 
-                  // Refresh accounts to include Meta accounts
-                  await refreshAccounts()
-                  resolve(true)
+                  if (completeResponse.ok) {
+                    setState(prev => ({
+                      ...prev,
+                      isLoading: false,
+                      isMetaAuthenticated: true,
+                      metaUser: {
+                        id: statusData.user_info?.id || '',
+                        name: statusData.user_info?.name || 'Meta User',
+                        email: statusData.user_info?.email
+                      }
+                    }))
+
+                    // Refresh accounts to include Meta accounts
+                    await refreshAccounts()
+                    resolve(true)
+                  } else {
+                    console.error('[SESSION] Failed to complete Meta OAuth')
+                    setState(prev => ({
+                      ...prev,
+                      isLoading: false,
+                      error: 'Failed to complete Meta authentication'
+                    }))
+                    resolve(false)
+                  }
                 } else {
                   setState(prev => ({
                     ...prev,
