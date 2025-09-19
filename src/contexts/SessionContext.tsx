@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { apiFetch } from '../utils/api'
 
 export interface AccountMapping {
   id: string
@@ -396,7 +397,7 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
 
     try {
       // Get Meta auth URL
-      const authUrlResponse = await fetch('/api/oauth/meta/auth-url', {
+      const authUrlResponse = await apiFetch('/api/oauth/meta/auth-url', {
         headers: {
           'X-Session-ID': state.sessionId || ''
         }
@@ -427,7 +428,7 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
               clearInterval(pollTimer)
 
               // Check Meta auth status
-              const statusResponse = await fetch('/api/oauth/meta/status', {
+              const statusResponse = await apiFetch('/api/oauth/meta/status', {
                 headers: {
                   'X-Session-ID': state.sessionId || ''
                 }
@@ -438,7 +439,7 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
 
                 if (statusData.authenticated) {
                   // Complete Meta OAuth flow - create database session
-                  const completeResponse = await fetch('/api/oauth/meta/complete', {
+                  const completeResponse = await apiFetch('/api/oauth/meta/complete', {
                     method: 'POST',
                     headers: {
                       'Content-Type': 'application/json',
@@ -528,7 +529,7 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
     setState(prev => ({ ...prev, isLoading: true }))
 
     try {
-      await fetch('/api/oauth/meta/logout', {
+      await apiFetch('/api/oauth/meta/logout', {
         method: 'POST',
         headers: {
           'X-Session-ID': state.sessionId || ''
@@ -553,7 +554,7 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
 
   const checkMetaAuth = async (): Promise<boolean> => {
     try {
-      const authResponse = await fetch('/api/oauth/meta/status', {
+      const authResponse = await apiFetch('/api/oauth/meta/status', {
         headers: {
           'X-Session-ID': state.sessionId || ''
         }
