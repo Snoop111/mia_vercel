@@ -294,7 +294,7 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
 
   const refreshAccounts = async (): Promise<void> => {
     try {
-      const response = await fetch('/api/accounts/available')
+      const response = await apiFetch('/api/accounts/available')
 
       if (response.ok) {
         const data = await response.json()
@@ -320,7 +320,7 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
 
     try {
 
-      const response = await fetch('/api/accounts/select', {
+      const response = await apiFetch('/api/accounts/select', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
