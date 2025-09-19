@@ -41,21 +41,17 @@ const OptimizePage = ({ onBack, question = "What can we improve?", isLoading = f
 
   // Fetch data when component mounts if not provided
   useEffect(() => {
-    console.log('🎯 [OPTIMIZE-PAGE] Mount with data:', !!data)
     if (data) {
       // Use pre-loaded data
-      console.log('✨ [OPTIMIZE-PAGE] Using pre-loaded data')
       setOptimizeData(data)
       setLoading(false)
     } else if (question) {
       // Fallback to fetch if no pre-loaded data
-      console.log('⚡ [OPTIMIZE-PAGE] No pre-loaded data, fetching...')
       fetchOptimizeData()
     }
   }, [data, question])
 
   const fetchOptimizeData = async () => {
-    console.log('🔄 [OPTIMIZE-PAGE] Starting data fetch...')
     setLoading(true)
     setError(null)
     try {
@@ -63,7 +59,6 @@ const OptimizePage = ({ onBack, question = "What can we improve?", isLoading = f
       const session = authService.getSession()
       const selectedAccount = session?.selectedAccount
       
-      console.log('📤 [OPTIMIZE-PAGE] Making API call with selected account:', selectedAccount?.name || 'No account selected')
       const response = await fetch('/api/improve-data', {
         method: 'POST',
         headers: {
@@ -78,16 +73,12 @@ const OptimizePage = ({ onBack, question = "What can we improve?", isLoading = f
         }),
       })
       
-      console.log('📡 [OPTIMIZE-PAGE] API response status:', response.status)
       const result = await response.json()
-      console.log('📋 [OPTIMIZE-PAGE] API result:', result)
       
       if (result.success && result.data) {
-        console.log('✅ [OPTIMIZE-PAGE] Setting optimize data:', result.data.source)
         setOptimizeData(result.data)
         setError(null)
       } else {
-        console.log('❌ [OPTIMIZE-PAGE] API failed:', result)
         setError('Unable to load optimization data. Please try again.')
         setOptimizeData(getErrorFallbackData())
       }
@@ -96,7 +87,6 @@ const OptimizePage = ({ onBack, question = "What can we improve?", isLoading = f
       setError('Connection error. Please check your connection.')
       setOptimizeData(getErrorFallbackData())
     } finally {
-      console.log('🏁 [OPTIMIZE-PAGE] Fetch complete, setting loading to false')
       setLoading(false)
     }
   }

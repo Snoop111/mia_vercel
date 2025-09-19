@@ -24,7 +24,6 @@ const AccountSelectionPage = ({ onAccountSelected, onBack }: AccountSelectionPag
   // Force load accounts even if not fully authenticated (for bypass mode)
   useEffect(() => {
     if (availableAccounts.length === 0) {
-      console.log('[ACCOUNT-SELECTION] No accounts loaded, forcing refresh')
       refreshAccounts()
     }
   }, [])

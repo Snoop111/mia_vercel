@@ -18,14 +18,6 @@ function App() {
   // Support both Google and Meta authentication
   const isAnyAuthenticated = isAuthenticated || isMetaAuthenticated
 
-  // Debug state changes
-  useEffect(() => {
-    console.log('[APP-STATE] App state changed to:', appState)
-    console.log('[APP-STATE] isAuthenticated (Google):', isAuthenticated)
-    console.log('[APP-STATE] isMetaAuthenticated (Meta):', isMetaAuthenticated)
-    console.log('[APP-STATE] selectedAccount:', selectedAccount?.name)
-    console.log('[APP-STATE] isLoading:', isLoading)
-  }, [appState, isAuthenticated, isMetaAuthenticated, selectedAccount, isLoading])
   const [preloadedData, setPreloadedData] = useState<any>(null) // Store pre-fetched data
 
   // Preload critical images - mobile-optimized approach
@@ -73,15 +65,12 @@ function App() {
     if (selectedAccount && appState === 'account-selection') {
       // User has selected an account - but only auto-transition from account-selection
       // Don't interfere with manual navigation from other states
-      console.log('🎯 [APP] Account selected, transitioning to main app:', selectedAccount.name)
       setAppState('main')
     } else if (isAnyAuthenticated && !selectedAccount && appState !== 'creative' && appState !== 'growth' && appState !== 'improve' && appState !== 'fix') {
       // User is authenticated (Google OR Meta) but needs to select an account
-      console.log('🔐 [APP] User authenticated, transitioning to account selection')
       setAppState('account-selection')
     } else if (!isAnyAuthenticated && !selectedAccount && appState !== 'video-intro') {
       // User logged out - reset to video intro
-      console.log('🔄 [APP] User logged out, resetting to video intro')
       setAppState('video-intro')
     }
   }, [isAuthenticated, isMetaAuthenticated, selectedAccount, isLoading, appState])
@@ -89,12 +78,8 @@ function App() {
   const handleAuthSuccess = () => {
     // This will be triggered by the FigmaLoginModal
     // We need to manually transition since we disabled auto-transition on video-intro
-    console.log('🎉 [APP] Auth success callback received - transitioning to account selection')
-    console.log('🎉 [APP] Current state:', { appState, isAuthenticated, selectedAccount })
-
     // Force transition to account selection after successful auth
     // The SessionContext should have updated isAuthenticated by now
-    console.log('🎉 [APP] Setting appState to account-selection')
     setAppState('account-selection')
   }
 
@@ -102,7 +87,6 @@ function App() {
   const { logout } = useSession()
 
   const handleQuestionClick = (questionType: 'growth' | 'improve' | 'fix', data?: any) => {
-    console.log(`📝 [APP] Navigation to ${questionType} with data:`, !!data)
     setPreloadedData(data) // Store the pre-fetched data
     if (questionType === 'growth') {
       setAppState('growth')
@@ -114,7 +98,6 @@ function App() {
   }
 
   const handleCreativeClick = () => {
-    console.log('🎨 [APP] Navigation to creative analysis')
     setAppState('creative')
   }
 
@@ -155,7 +138,7 @@ function App() {
               className="w-full h-full"
             >
               <AccountSelectionPage
-                onAccountSelected={() => console.log('Account selected - state will auto-update')}
+                onAccountSelected={() => {}}
                 onBack={() => logout()}
               />
             </motion.div>
@@ -171,11 +154,9 @@ function App() {
             >
               <MainViewCopy
                 onLogout={async () => {
-                  console.log('🚪 User logout requested')
                   await logout()
                   // Reset app state to video intro after logout
                   setAppState('video-intro')
-                  console.log('🔄 App state reset to video-intro')
                 }}
                 onQuestionClick={handleQuestionClick}
                 onCreativeClick={handleCreativeClick}
@@ -252,7 +233,6 @@ function App() {
             >
               <CreativePageFixed
                 onBack={() => {
-                  console.log('[APP] Creative back clicked - stable transition')
                   setAppState('main')
                   setPreloadedData(null) // Clear any preloaded data
                 }}

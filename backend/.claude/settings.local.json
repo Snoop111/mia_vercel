@@ -14,7 +14,10 @@
       "Bash(taskkill:*)",
       "Bash(python test_raw_mcp_data.py:*)",
       "Bash(python test_enhanced_formatter.py:*)",
-      "Bash(python test:*)"
+      "Bash(python test:*)",
+      "Bash(python:*)",
+      "Bash(pkill:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

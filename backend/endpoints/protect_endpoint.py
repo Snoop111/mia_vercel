@@ -18,10 +18,10 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
-from backend.services.adk_mcp_integration import get_adk_marketing_agent
-from backend.services.creative_import import get_creative_insights
-from backend.database import SessionLocal, get_db
-from backend.models.user_profile import AccountMapping
+from services.adk_mcp_integration import get_adk_marketing_agent
+from services.creative_import import get_creative_insights
+from database import SessionLocal, get_db
+from models.user_profile import AccountMapping
 
 router = APIRouter()
 
@@ -304,7 +304,7 @@ Question: {protect_question}
 Provide 3-4 concise insights about protecting your best campaigns. Use South African Rand (R) for all currency amounts. Be direct and specific - no introductions."""
 
         # Use same Claude agent system as Growth/Optimize endpoint
-        from backend.services.claude_agent import get_claude_intent_agent
+        from services.claude_agent import get_claude_intent_agent
         claude_agent = await get_claude_intent_agent()
         
         headers = {

@@ -8,8 +8,8 @@ from typing import Optional, Dict, Any, List
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
-from backend.database import get_db
-from backend.models.user_profile import UserProfile, AuthSession, UserActivity, AccountMapping
+from database import get_db
+from models.user_profile import UserProfile, AuthSession, UserActivity, AccountMapping
 
 
 class SessionService:

@@ -9,10 +9,10 @@ import aiohttp
 import asyncio
 from datetime import datetime, timedelta
 
-from backend.services.session_service import SessionService
-from backend.services.account_setup import get_account_selection_data
-from backend.models.user_profile import UserProfile, AuthSession
-from backend.database import get_db
+from services.session_service import SessionService
+from services.account_setup import get_account_selection_data
+from models.user_profile import UserProfile, AuthSession
+from database import get_db
 from sqlalchemy.orm import Session
 
 router = APIRouter()

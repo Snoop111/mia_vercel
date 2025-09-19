@@ -28,20 +28,20 @@ import tempfile
 import os
 
 # Add backend to path
-sys.path.append('backend')
+sys.path.append('')
 
 # Import all models FIRST to register them with Base
-from backend.models.chat import ChatHistory, UserSession
-from backend.models.session import ChatSession
-from backend.models.creative import AdCreative, CreativeInsight
+from models.chat import ChatHistory, UserSession
+from models.session import ChatSession
+from models.creative import AdCreative, CreativeInsight
 
 # Then import other modules
-from backend.services.adk_mcp_integration import get_adk_marketing_agent, reset_adk_marketing_agent
-from backend.database import get_db, init_db
-from backend.services.creative_import import CreativeDataImporter, get_creative_insights, get_ad_creative_summary
+from services.adk_mcp_integration import get_adk_marketing_agent, reset_adk_marketing_agent
+from database import get_db, init_db
+from services.creative_import import CreativeDataImporter, get_creative_insights, get_ad_creative_summary
 
 # Import modular endpoints
-from backend.endpoints import (
+from endpoints import (
     auth_router,
     meta_auth_router,
     chat_router,
@@ -51,6 +51,9 @@ from backend.endpoints import (
     protect_router,
     static_router
 )
+
+# Import refactored creative module
+from services.creative import creative_router as creative_router_v2
 
 def extract_account_info_from_request(request) -> Dict[str, Any]:
     """DEPRECATED: This function is no longer needed - use session service instead"""
@@ -83,6 +86,7 @@ app.include_router(auth_router, tags=["auth"])
 app.include_router(meta_auth_router, tags=["meta-auth"])
 app.include_router(chat_router, tags=["chat"])
 app.include_router(creative_router, tags=["creative"])
+app.include_router(creative_router_v2, tags=["creative-v2"])  # Refactored creative module
 app.include_router(growth_router, tags=["growth"])
 app.include_router(optimize_router, tags=["optimize"])
 app.include_router(protect_router, tags=["protect"])
@@ -96,7 +100,7 @@ _global_agent = None
 async def test_account_mappings(db: Session = Depends(get_db)):
     """Test endpoint to verify account mappings work"""
     try:
-        from backend.models.user_profile import AccountMapping
+        from models.user_profile import AccountMapping
         accounts = db.query(AccountMapping).filter(
             AccountMapping.is_active == True
         ).order_by(AccountMapping.sort_order).all()
@@ -143,18 +147,18 @@ except Exception as e:
 async def initialize_account_mappings(db: Session = Depends(get_db)):
     """Initialize account mappings with all three test accounts"""
     try:
-        from backend.models.user_profile import AccountMapping
+        from models.user_profile import AccountMapping
 
         # Clear existing mappings first
         db.query(AccountMapping).delete()
 
-        # Create all three test accounts as documented
+        # Create all three test accounts using environment variables
         accounts = [
             AccountMapping(
                 account_id="dfsa",
                 account_name="DFSA - Goodness to Go",
-                google_ads_id="7574136388",
-                ga4_property_id="458016659",
+                google_ads_id=os.getenv("DEV_DFSA_GOOGLE_ADS_ID", "7574136388"),
+                ga4_property_id=os.getenv("DEV_DFSA_GA4_PROPERTY_ID", "458016659"),
                 business_type="food",
                 is_active=True,
                 sort_order=1,
@@ -163,8 +167,8 @@ async def initialize_account_mappings(db: Session = Depends(get_db)):
             AccountMapping(
                 account_id="cherry_time",
                 account_name="Cherry Time - Fresh Fruit",
-                google_ads_id="8705861821",
-                ga4_property_id="292652926",
+                google_ads_id=os.getenv("DEV_CHERRY_TIME_GOOGLE_ADS_ID", "8705861821"),
+                ga4_property_id=os.getenv("DEV_CHERRY_TIME_GA4_PROPERTY_ID", "292652926"),
                 business_type="food",
                 is_active=True,
                 sort_order=2,
@@ -173,8 +177,8 @@ async def initialize_account_mappings(db: Session = Depends(get_db)):
             AccountMapping(
                 account_id="onvlee",
                 account_name="Onvlee Engineering - Cable Trays",
-                google_ads_id="7482456286",
-                ga4_property_id="428236885",
+                google_ads_id=os.getenv("DEV_ONVLEE_GOOGLE_ADS_ID", "7482456286"),
+                ga4_property_id=os.getenv("DEV_ONVLEE_GA4_PROPERTY_ID", "428236885"),
                 business_type="engineering",
                 is_active=True,
                 sort_order=3,
@@ -211,7 +215,7 @@ async def initialize_account_mappings(db: Session = Depends(get_db)):
 async def initialize_meta_account_mappings(db: Session = Depends(get_db)):
     """Initialize Meta account mappings based on discovered Meta ad accounts"""
     try:
-        from backend.models.user_profile import AccountMapping
+        from models.user_profile import AccountMapping
 
         # Meta accounts discovered from API
         meta_accounts = [
@@ -300,7 +304,7 @@ async def reset_mcp_agent():
 async def get_account_status(db: Session = Depends(get_db)):
     """Get status of all account mappings"""
     try:
-        from backend.models.user_profile import AccountMapping
+        from models.user_profile import AccountMapping
         accounts = db.query(AccountMapping).filter(AccountMapping.is_active == True).order_by(AccountMapping.sort_order).all()
 
         return {
@@ -326,7 +330,7 @@ async def get_account_status(db: Session = Depends(get_db)):
 async def create_test_sessions(db: Session = Depends(get_db)):
     """Create test sessions for all accounts (for testing multi-account functionality)"""
     try:
-        from backend.services.test_session_helper import create_test_session
+        from services.test_session_helper import create_test_session
 
         # Create individual test sessions
         test_sessions = [

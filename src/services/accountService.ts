@@ -81,7 +81,6 @@ class AccountService {
     }
 
     try {
-      console.log('🔄 Fetching all accounts for authenticated user...')
       
       // Get authenticated user's accounts via MCP tools
       const [googleAdsResponse, ga4Response] = await Promise.all([
@@ -92,7 +91,6 @@ class AccountService {
       const googleAdsAccounts: RawGoogleAdsAccount[] = googleAdsResponse.accounts || []
       const ga4Properties: RawGA4Property[] = ga4Response.properties || []
 
-      console.log(`📊 Found ${googleAdsAccounts.length} Google Ads accounts, ${ga4Properties.length} GA4 properties`)
 
       // Build separate collections
       const collections = await this.buildAccountCollections(googleAdsAccounts, ga4Properties)
@@ -101,7 +99,6 @@ class AccountService {
       this.cachedCollections = collections
       this.lastFetchTime = Date.now()
       
-      console.log(`✅ Built collections: ${collections.googleAds.length} Ads, ${collections.ga4.length} GA4, ${collections.combined.length} Combined`)
       return collections
     } catch (error) {
       console.error('❌ Failed to fetch account collections:', error)
@@ -118,7 +115,6 @@ class AccountService {
    * Fetch Google Ads accounts using MCP tool
    */
   private async fetchGoogleAdsAccounts(): Promise<any> {
-    console.log('🔄 [AccountService] Fetching Google Ads accounts...')
     
     const response = await fetch('/api/mcp/google-ads-accounts', {
       method: 'POST',
@@ -129,7 +125,6 @@ class AccountService {
       })
     })
     
-    console.log('📡 [AccountService] Google Ads response status:', response.status)
     
     if (!response.ok) {
       console.error('❌ [AccountService] Google Ads fetch failed:', response.status, response.statusText)
@@ -137,7 +132,6 @@ class AccountService {
     }
     
     const result = await response.json()
-    console.log('✅ [AccountService] Google Ads result:', result)
     
     return result
   }
@@ -146,7 +140,6 @@ class AccountService {
    * Fetch GA4 properties using MCP tool
    */
   private async fetchGA4Properties(): Promise<any> {
-    console.log('🔄 [AccountService] Fetching GA4 properties...')
     
     const response = await fetch('/api/mcp/ga4-properties', {
       method: 'POST',
@@ -157,7 +150,6 @@ class AccountService {
       })
     })
     
-    console.log('📡 [AccountService] GA4 response status:', response.status)
     
     if (!response.ok) {
       console.error('❌ [AccountService] GA4 fetch failed:', response.status, response.statusText)
@@ -165,7 +157,6 @@ class AccountService {
     }
     
     const result = await response.json()
-    console.log('✅ [AccountService] GA4 result:', result)
     
     return result
   }

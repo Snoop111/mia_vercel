@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
 import BottomQuestionBar from './BottomQuestionBar'
+import CreativeDatePicker from './CreativeDatePicker'
 import { useSession } from '../contexts/SessionContext'
 
 // Import all the logic from the old CreativePage
@@ -76,7 +77,6 @@ const CreativePageFixed = ({ onBack }: CreativePageProps) => {
   // Date picker state
   const [showDatePicker, setShowDatePicker] = useState(false)
   const [userSelectedStartDate, setUserSelectedStartDate] = useState<string>('2025-08-03') // Default start date: Aug 3
-  const [tempSelectedStartDate, setTempSelectedStartDate] = useState<string>('2025-08-03') // Temporary date for picker
 
   // Account switching handler
   const handleAccountSwitch = async (accountId: string) => {
@@ -87,12 +87,10 @@ const CreativePageFixed = ({ onBack }: CreativePageProps) => {
     setShowAccountSelector(false)
 
     try {
-      console.log(`🔄 [CREATIVE] Switching to account: ${accountId}`)
       const success = await selectAccount(accountId)
 
       if (success) {
         const newAccount = availableAccounts.find(acc => acc.id === accountId)
-        console.log(`✅ [CREATIVE] Successfully switched to: ${newAccount?.name}`)
 
         // Clear chat messages when switching accounts
         setMessagesByCategory({
@@ -145,7 +143,6 @@ const CreativePageFixed = ({ onBack }: CreativePageProps) => {
       loadedCount += 1
       if (loadedCount === totalImages) {
         setImagesLoaded(true)
-        console.log('[PRELOAD] All gradient images loaded successfully')
       }
     }
 
@@ -176,8 +173,12 @@ const CreativePageFixed = ({ onBack }: CreativePageProps) => {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [showDatePicker])
   
-  // Smart date range calculation - user selects start date, system calculates end date
-  const calculateDateRange = (startDate: string, category: Category) => {
+  // Date utility functions - now handled by CreativeDatePicker component
+  // calculateDateRange and formatDateRangeForDisplay moved to CreativeDatePicker
+
+  // Dynamic date range based on category and user selection
+  const getDateRangeForCategory = (category: Category, customStartDate?: string) => {
+    const startDate = customStartDate || userSelectedStartDate
     const start = new Date(startDate)
     const daysToAdd = category === 'protect' ? 6 : 30 // 7 days total for protect, 31 days for grow/optimize
     const end = new Date(start)
@@ -189,29 +190,22 @@ const CreativePageFixed = ({ onBack }: CreativePageProps) => {
     }
   }
 
-  // Format date for display (e.g., "02 Jan - 01 Feb") - D/M/Y format (not American M/D/Y)
+  // Format date for display in header
   const formatDateRangeForDisplay = (startDate: string, endDate: string) => {
     const start = new Date(startDate)
     const end = new Date(endDate)
 
     const formatDate = (date: Date) => {
       const day = date.getDate().toString().padStart(2, '0')
-      const month = date.toLocaleDateString('en-GB', { month: 'short' }) // British format ensures correct month names
-      return `${day} ${month}` // Day first, then month (D/M format)
+      const month = date.toLocaleDateString('en-GB', { month: 'short' })
+      return `${day} ${month}`
     }
 
     return `${formatDate(start)} - ${formatDate(end)}`
   }
-
-  // Dynamic date range based on category and user selection
-  const getDateRangeForCategory = (category: Category, customStartDate?: string) => {
-    const startDate = customStartDate || userSelectedStartDate
-    return calculateDateRange(startDate, category)
-  }
   
   const [selectedDateRange, setSelectedDateRange] = useState(() => {
     const initialRange = getDateRangeForCategory(activeCategory, userSelectedStartDate)
-    console.log(`[DATE-INIT] Initial date range:`, initialRange)
     return initialRange
   })
 
@@ -290,7 +284,6 @@ const CreativePageFixed = ({ onBack }: CreativePageProps) => {
     const question = PRESET_QUESTIONS[activeCategory][questionIndex]
     if (!question || isAnalyzing) return
 
-    console.log(`[CREATIVE-PAGE-FIXED] Initial question selected: "${question}" (index: ${questionIndex}) in category: ${activeCategory}`)
 
     // Mark this question as asked and switch to cycling mode
     setAskedQuestionsByCategory(prev => ({
@@ -347,7 +340,6 @@ const CreativePageFixed = ({ onBack }: CreativePageProps) => {
     const currentAvailableIndex = currentQuestionIndex % availableQuestions.length
     const questionIndex = availableQuestions[currentAvailableIndex]
 
-    console.log(`[CREATIVE-PAGE-FIXED] Cycling question: "${question}" (index: ${questionIndex}) in category: ${activeCategory}`)
 
     // Mark this question as asked
     setAskedQuestionsByCategory(prev => ({
@@ -396,7 +388,6 @@ const CreativePageFixed = ({ onBack }: CreativePageProps) => {
   // Shared analysis logic
   // Refresh functionality - reset to initial state
   const handleRefresh = () => {
-    console.log('[CREATIVE-REFRESH] Resetting current tab to initial state')
     
     // Reset current tab only - don't change activeCategory
     setIsAnalyzing(false)
@@ -417,7 +408,6 @@ const CreativePageFixed = ({ onBack }: CreativePageProps) => {
 
   // Sign out functionality
   const handleSignOut = async () => {
-    console.log('[CREATIVE-SIGNOUT] User logout requested')
     try {
       await logout()
       if (onBack) {
@@ -436,7 +426,6 @@ const CreativePageFixed = ({ onBack }: CreativePageProps) => {
         throw new Error('No session or account selected. Please log in and select an account.')
       }
 
-      console.log('[CREATIVE] Using account:', selectedAccount?.name, 'Ads ID:', selectedAccount?.google_ads_id)
 
       // Use session-based account switching - backend will resolve account IDs
       const response = await fetch('/api/creative-analysis', {
@@ -509,20 +498,16 @@ const CreativePageFixed = ({ onBack }: CreativePageProps) => {
     setQuestionFlow(newCategoryMessages.length > 0 ? 'cycling' : 'initial')
   }
 
-  // Handle date selection (don't auto-close to allow selecting D/M/Y)
+  // Handle date selection from CreativeDatePicker component
   const handleDateSelection = (newStartDate: string, shouldClose = false) => {
-    console.log(`[DATE-PICKER] User selected start date: ${newStartDate}`)
-    console.log(`[DATE-PICKER] Active category: ${activeCategory}`)
 
     setUserSelectedStartDate(newStartDate)
     const newDateRange = getDateRangeForCategory(activeCategory, newStartDate)
 
-    console.log(`[DATE-PICKER] Calculated range:`, newDateRange)
-    console.log(`[DATE-PICKER] Formatted display:`, formatDateRangeForDisplay(newDateRange.start, newDateRange.end))
 
     setSelectedDateRange(newDateRange)
 
-    // Only close if explicitly requested (e.g., clicking outside or done button)
+    // Close picker if requested
     if (shouldClose) {
       setShowDatePicker(false)
     }
@@ -684,90 +669,20 @@ const CreativePageFixed = ({ onBack }: CreativePageProps) => {
         <div className="flex-1 flex justify-end pr-2">
           <div className="relative date-picker-container">
             <button
-              onClick={() => {
-                setTempSelectedStartDate(userSelectedStartDate) // Sync temp with current
-                setShowDatePicker(!showDatePicker)
-              }}
+              onClick={() => setShowDatePicker(!showDatePicker)}
               className="w-6 h-6 flex items-center justify-center"
             >
               <img src="/icons/calendar.svg" alt="Calendar" className="w-6 h-6" />
             </button>
 
-            {/* Date Picker Dropdown */}
-            {showDatePicker && (
-              <div className="absolute top-8 right-0 bg-white rounded-lg shadow-lg border border-gray-200 p-4 z-50 min-w-80">
-                <div className="text-sm font-medium text-gray-900 mb-3">Select Start Date (DD/MM/YYYY)</div>
-
-                {/* Custom Date Picker - D/M/Y Format */}
-                <div className="flex gap-2 mb-3">
-                  {/* Day */}
-                  <select
-                    value={new Date(tempSelectedStartDate).getDate()}
-                    onChange={(e) => {
-                      const currentDate = new Date(tempSelectedStartDate)
-                      currentDate.setDate(parseInt(e.target.value))
-                      setTempSelectedStartDate(currentDate.toISOString().split('T')[0])
-                    }}
-                    className="px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                  >
-                    {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
-                      <option key={day} value={day}>{day.toString().padStart(2, '0')}</option>
-                    ))}
-                  </select>
-
-                  {/* Month */}
-                  <select
-                    value={new Date(tempSelectedStartDate).getMonth()}
-                    onChange={(e) => {
-                      const currentDate = new Date(tempSelectedStartDate)
-                      currentDate.setMonth(parseInt(e.target.value))
-                      setTempSelectedStartDate(currentDate.toISOString().split('T')[0])
-                    }}
-                    className="px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm flex-1"
-                  >
-                    {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month, index) => (
-                      <option key={index} value={index}>{month}</option>
-                    ))}
-                  </select>
-
-                  {/* Year */}
-                  <select
-                    value={new Date(tempSelectedStartDate).getFullYear()}
-                    onChange={(e) => {
-                      const currentDate = new Date(tempSelectedStartDate)
-                      currentDate.setFullYear(parseInt(e.target.value))
-                      setTempSelectedStartDate(currentDate.toISOString().split('T')[0])
-                    }}
-                    className="px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                  >
-                    {Array.from({ length: 11 }, (_, i) => 2025 - i).map(year => (
-                      <option key={year} value={year}>{year}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="text-xs text-gray-500 mt-2">
-                  {activeCategory === 'protect' ? '7-day range' : '30-day range'} will be automatically calculated
-                </div>
-                <div className="flex justify-between items-center mt-1">
-                  <div className="text-xs text-gray-600 font-medium">
-                    Preview: {formatDateRangeForDisplay(
-                      tempSelectedStartDate,
-                      calculateDateRange(tempSelectedStartDate, activeCategory).end
-                    )}
-                  </div>
-                  <button
-                    onClick={() => {
-                      handleDateSelection(tempSelectedStartDate)
-                      setShowDatePicker(false)
-                    }}
-                    className="px-3 py-1.5 bg-black text-white text-xs font-medium rounded-md hover:bg-gray-800 transition-colors"
-                  >
-                    Apply
-                  </button>
-                </div>
-              </div>
-            )}
+            {/* Date Picker Component */}
+            <CreativeDatePicker
+              isOpen={showDatePicker}
+              startDate={userSelectedStartDate}
+              category={activeCategory}
+              onDateChange={handleDateSelection}
+              onClose={() => setShowDatePicker(false)}
+            />
           </div>
         </div>
       </div>
@@ -796,28 +711,19 @@ const CreativePageFixed = ({ onBack }: CreativePageProps) => {
           onClick={(e) => {
             e.preventDefault()
             e.stopPropagation()
-            console.log('[CREATIVE-BACK] Back to homepage clicked!')
-            console.log('[CREATIVE-BACK] onBack prop exists:', !!onBack)
-            console.log('[CREATIVE-BACK] Event target:', e.target)
-            console.log('[CREATIVE-BACK] Event currentTarget:', e.currentTarget)
 
             if (onBack) {
-              console.log('[CREATIVE-BACK] Calling onBack() to return to main page')
               onBack()
             } else {
-              console.log('[CREATIVE-BACK] ERROR: onBack prop is not provided!')
             }
           }}
           onTouchStart={(e) => {
-            console.log('[CREATIVE-BACK] Touch started on back button')
             e.currentTarget.style.transform = 'scale(0.9) translateY(-5px) translateX(15px)'
           }}
           onTouchEnd={(e) => {
-            console.log('[CREATIVE-BACK] Touch ended on back button')
             e.currentTarget.style.transform = 'scale(1) translateY(-5px) translateX(15px)'
           }}
           onTouchCancel={(e) => {
-            console.log('[CREATIVE-BACK] Touch cancelled on back button')
             e.currentTarget.style.transform = 'scale(1) translateY(-5px) translateX(15px)'
             e.currentTarget.style.opacity = '1'
           }}
@@ -844,7 +750,6 @@ const CreativePageFixed = ({ onBack }: CreativePageProps) => {
           <span className="text-white font-medium text-lg">
             {(() => {
               const displayText = formatDateRangeForDisplay(selectedDateRange.start, selectedDateRange.end)
-              console.log(`[DATE-DISPLAY] Rendering header with range:`, selectedDateRange, `Display: "${displayText}"`)
               return displayText
             })()}
           </span>
@@ -957,7 +862,6 @@ const CreativePageFixed = ({ onBack }: CreativePageProps) => {
         <div ref={messagesEndRef} />
         
         {(() => {
-          console.log('RENDER CHECK - questionFlow:', questionFlow, 'messages.length:', messages.length, 'activeCategory:', activeCategory)
           return questionFlow === 'initial' && messages.length === 0
         })() && (
           <div className="flex flex-col items-center space-y-3 mt-8">

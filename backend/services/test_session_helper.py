@@ -2,9 +2,10 @@
 Test Session Helper - Creates sessions for different accounts during testing
 """
 from sqlalchemy.orm import Session
-from backend.models.user_profile import AuthSession, AccountMapping
-from backend.database import get_db
+from models.user_profile import AuthSession, AccountMapping
+from database import get_db
 import uuid
+import os
 from datetime import datetime, timedelta
 
 def create_test_session(session_id: str, account_id: str, db: Session) -> bool:
@@ -48,7 +49,7 @@ def create_test_session(session_id: str, account_id: str, db: Session) -> bool:
             # Create new session
             new_session = AuthSession(
                 session_id=session_id,
-                google_user_id="106540664695114193744",  # Test user ID
+                google_user_id=os.getenv("DEV_USER_ID", "106540664695114193744"),  # Test user ID from env
                 authenticated=True,
                 selected_account_id=account_id,
                 google_ads_id=account.google_ads_id,

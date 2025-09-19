@@ -15,13 +15,11 @@ export const clearMetaAuth = (): void => {
 
     metaKeys.forEach(key => {
       localStorage.removeItem(key)
-      console.log(`[CLEAR-META] Removed localStorage: ${key}`)
     })
 
     // Clear Meta-specific sessionStorage items
     metaKeys.forEach(key => {
       sessionStorage.removeItem(key)
-      console.log(`[CLEAR-META] Removed sessionStorage: ${key}`)
     })
 
     // Clear any Meta-related cookies (if accessible)
@@ -37,7 +35,6 @@ export const clearMetaAuth = (): void => {
       document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.meta.com;`
     })
 
-    console.log('[CLEAR-META] Cleared all Meta authentication data from browser storage')
   } catch (error) {
     console.error('[CLEAR-META] Error clearing Meta auth data:', error)
   }
@@ -61,7 +58,6 @@ export const logoutMeta = async (sessionId?: string): Promise<void> => {
     })
 
     const result = await response.json()
-    console.log('[LOGOUT-META] Server response:', result)
 
   } catch (error) {
     console.error('[LOGOUT-META] Error during Meta logout:', error)

@@ -3,8 +3,8 @@ Account Setup and Initialization
 Populates the account_mappings table with the three test accounts
 """
 from sqlalchemy.orm import Session
-from backend.database import get_db
-from backend.models.user_profile import AccountMapping
+from database import get_db
+from models.user_profile import AccountMapping
 
 
 def initialize_account_mappings():

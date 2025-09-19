@@ -22,9 +22,9 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
-from backend.services.adk_mcp_integration import get_adk_marketing_agent
-from backend.database import get_db
-from backend.models.user_profile import AccountMapping
+from services.adk_mcp_integration import get_adk_marketing_agent
+from database import get_db
+from models.user_profile import AccountMapping
 
 router = APIRouter()
 
@@ -39,7 +39,7 @@ def get_account_context(session_id: str, db: Session) -> Dict[str, Any]:
     """Get account context from session - SIMPLIFIED like temp_github_working"""
     try:
         # Simple direct session lookup from AuthSession table
-        from backend.models.user_profile import AuthSession
+        from models.user_profile import AuthSession
         session = db.query(AuthSession).filter(
             AuthSession.session_id == session_id,
             AuthSession.authenticated == True
@@ -67,22 +67,22 @@ def get_account_context(session_id: str, db: Session) -> Dict[str, Any]:
         # Simple fallback to DFSA (like working version)
         print(f"[CREATIVE-ACCOUNT-CONTEXT] No valid session/account, using DFSA fallback")
         return {
-            "user_id": "106540664695114193744",
+            "user_id": os.getenv("DEV_USER_ID", "106540664695114193744"),
             "account_id": "dfsa",
             "account_name": "DFSA - Goodness to Go",
-            "google_ads_id": "7574136388",
-            "ga4_property_id": "458016659",
+            "google_ads_id": os.getenv("DEV_DFSA_GOOGLE_ADS_ID", "7574136388"),
+            "ga4_property_id": os.getenv("DEV_DFSA_GA4_PROPERTY_ID", "458016659"),
             "business_type": "food",
             "focus_account": "dfsa",
         }
     except Exception as e:
         print(f"[CREATIVE-ACCOUNT-CONTEXT] Error: {e}, using DFSA fallback")
         return {
-            "user_id": "106540664695114193744",
+            "user_id": os.getenv("DEV_USER_ID", "106540664695114193744"),
             "account_id": "dfsa",
             "account_name": "DFSA - Goodness to Go",
-            "google_ads_id": "7574136388",
-            "ga4_property_id": "458016659",
+            "google_ads_id": os.getenv("DEV_DFSA_GOOGLE_ADS_ID", "7574136388"),
+            "ga4_property_id": os.getenv("DEV_DFSA_GA4_PROPERTY_ID", "458016659"),
             "business_type": "food",
             "focus_account": "dfsa",
         }
@@ -1459,7 +1459,7 @@ Please analyze the creative asset performance data above and provide specific re
 FORMATTING: Use clear section headers followed by bullet points. Avoid numbering immediately after headers (e.g. use "Key Findings:" then bullets, not "Key Findings: 1.")"""
 
         # REUSE: Claude API integration (from chat_endpoint.py)
-        from backend.services.claude_agent import get_claude_intent_agent
+        from services.claude_agent import get_claude_intent_agent
         claude_agent = await get_claude_intent_agent()
         
         print(f"[CREATIVE-ANALYSIS] Sending to Claude...")

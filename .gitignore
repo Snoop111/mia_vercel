@@ -70,6 +70,11 @@ cookies.txt
 *.temp
 /tmp/
 
+# Debug and development files
+debug_*.json
+data_flow_analysis.json
+creative_intelligence.json
+
 # IDE files
 *.swp
 *.swo

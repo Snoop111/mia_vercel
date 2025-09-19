@@ -26,12 +26,10 @@ const MainViewCopy = ({ onLogout: _onLogout, onQuestionClick, onCreativeClick }:
     setShowAccountSelector(false)
 
     try {
-      console.log(`🔄 [MAIN] Switching to account: ${accountId}`)
       const success = await selectAccount(accountId)
 
       if (success) {
         const newAccount = availableAccounts.find(acc => acc.id === accountId)
-        console.log(`✅ [MAIN] Successfully switched to: ${newAccount?.name}`)
 
         // Clear any existing chat messages when switching accounts
         setChatMessages([])
@@ -105,8 +103,6 @@ const MainViewCopy = ({ onLogout: _onLogout, onQuestionClick, onCreativeClick }:
     }, 100)
 
     try {
-      console.log('[CHAT] Sending message to test app API:', message)
-      console.log('[CHAT] Using account:', selectedAccount?.name, 'Ads ID:', selectedAccount?.google_ads_id)
       
       const response = await fetch('/api/mia-chat-test', {
         method: 'POST',
@@ -123,7 +119,6 @@ const MainViewCopy = ({ onLogout: _onLogout, onQuestionClick, onCreativeClick }:
       })
 
       const result = await response.json()
-      console.log('[CHAT] Received response:', result)
 
       setIsChatLoading(false) // Remove loading state
 
@@ -154,9 +149,7 @@ const MainViewCopy = ({ onLogout: _onLogout, onQuestionClick, onCreativeClick }:
       const session = authService.getSession()
       const selectedAccount = session?.selectedAccount
       
-      console.log(`🔄 [MAIN-VIEW] Pre-fetching data for ${context}...`)
       const apiUrl = getApiUrl(context)
-      console.log(`🔗 [MAIN-VIEW] Using API URL: ${apiUrl}`)
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -172,7 +165,6 @@ const MainViewCopy = ({ onLogout: _onLogout, onQuestionClick, onCreativeClick }:
       })
       
       const result = await response.json()
-      console.log(`✅ [MAIN-VIEW] Pre-fetch complete for ${context}:`, result.source)
       
       if (result.success && result.data) {
         return result.data

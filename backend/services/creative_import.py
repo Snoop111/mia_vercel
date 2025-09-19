@@ -8,7 +8,7 @@ import pandas as pd
 from typing import Dict, List, Any, Optional
 from datetime import datetime
 from sqlalchemy.orm import Session
-from backend.models.creative import AdCreative, CreativeInsight
+from models.creative import AdCreative, CreativeInsight
 import logging
 
 logger = logging.getLogger(__name__)

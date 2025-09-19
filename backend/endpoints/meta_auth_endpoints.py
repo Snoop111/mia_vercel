@@ -7,12 +7,13 @@ from pydantic import BaseModel
 from typing import Dict, Any, Optional, List
 import aiohttp
 import time
+import os
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 
-from backend.database import get_db
-from backend.models.user_profile import AccountMapping, UserProfile, AuthSession
-from backend.services.session_service import SessionService
+from database import get_db
+from models.user_profile import AccountMapping, UserProfile, AuthSession
+from services.session_service import SessionService
 
 router = APIRouter()
 
@@ -316,10 +317,10 @@ async def bypass_meta_login(request: Request, db: Session = Depends(get_db)):
         print(f"[META-BYPASS-LOGIN] Creating Meta bypass session: {frontend_session_id}")
 
         # Use same user profile as Google (unified user management)
-        test_user_id = "106540664695114193744"  # Trystin's user ID
+        test_user_id = os.getenv("DEV_USER_ID", "106540664695114193744")  # Test user ID from env
 
         # Create or update user profile for bypass
-        from backend.models.user_profile import UserProfile
+        from models.user_profile import UserProfile
         profile = db.query(UserProfile).filter(UserProfile.google_user_id == test_user_id).first()
 
         if not profile:

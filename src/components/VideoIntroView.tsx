@@ -27,20 +27,17 @@ const VideoIntroView = ({ onAuthSuccess }: VideoIntroViewProps) => {
 
       // Show modal at 33 seconds (only once)
       if (duration && currentTime >= 33 && !modalTimerSet && !showLoginModal) {
-        console.log('🔐 Showing login modal at 33 seconds')
         setModalTimerSet(true)
         setShowLoginModal(true)
       }
 
       // Check if we've reached the looping section (last 10 seconds)
       if (duration && currentTime >= (duration - 10) && videoPhase === 'intro') {
-        console.log('🎬 Entering loop phase at', currentTime.toFixed(2), 'of', duration.toFixed(2))
         setVideoPhase('looping')
       }
 
       // Handle seamless looping - jump back to loop start before video ends
       if (videoPhase === 'looping' && duration && currentTime >= duration - 0.1) {
-        console.log('🔄 Seamless loop: jumping from', currentTime.toFixed(2), 'to', (duration - 10).toFixed(2))
         video.currentTime = duration - 10
       }
     }
@@ -48,7 +45,6 @@ const VideoIntroView = ({ onAuthSuccess }: VideoIntroViewProps) => {
     const handleEnded = () => {
       // This should rarely fire due to seamless loop handling above
       if (videoPhase === 'intro') {
-        console.log('🎬 Video ended during intro, entering loop mode')
         setVideoPhase('looping')
         const duration = video.duration
         if (duration) {
@@ -63,7 +59,6 @@ const VideoIntroView = ({ onAuthSuccess }: VideoIntroViewProps) => {
         // In loop phase - restart the loop section
         const duration = video.duration
         if (duration) {
-          console.log('🔄 Loop ended, restarting at', (duration - 10).toFixed(2))
           video.currentTime = duration - 10
           video.play()
         }
@@ -71,12 +66,10 @@ const VideoIntroView = ({ onAuthSuccess }: VideoIntroViewProps) => {
     }
 
     const handleLoadedMetadata = () => {
-      console.log('🎬 Video metadata loaded, duration:', video.duration)
       setVideoLoaded(true)
     }
 
     const handleCanPlayThrough = () => {
-      console.log('🎬 Video ready to play through')
       video.play().catch(error => {
         console.error('🚫 Video autoplay failed:', error)
         // Fallback: show modal immediately if video fails to play
@@ -90,14 +83,12 @@ const VideoIntroView = ({ onAuthSuccess }: VideoIntroViewProps) => {
     video.addEventListener('canplaythrough', handleCanPlayThrough)
 
     return () => {
-      console.log('🧹 VideoIntroView cleanup running...')
       video.removeEventListener('timeupdate', handleTimeUpdate)
       video.removeEventListener('ended', handleEnded)
       video.removeEventListener('loadedmetadata', handleLoadedMetadata)
       video.removeEventListener('canplaythrough', handleCanPlayThrough)
       
       if (modalTimerRef.current) {
-        console.log('🧹 Clearing timer in cleanup:', modalTimerRef.current)
         clearTimeout(modalTimerRef.current)
       }
     }

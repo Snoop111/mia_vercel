@@ -17,16 +17,16 @@ from typing import Dict, Any, Optional
 import asyncio
 import json
 import httpx
+import os
 
 # Import backend dependencies
 import sys
-import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
-from backend.services.adk_mcp_integration import get_adk_marketing_agent
-from backend.services.creative_import import get_creative_insights
-from backend.database import SessionLocal, get_db
-from backend.models.user_profile import AccountMapping
+from services.adk_mcp_integration import get_adk_marketing_agent
+from services.creative_import import get_creative_insights
+from database import SessionLocal, get_db
+from models.user_profile import AccountMapping
 
 router = APIRouter()
 
@@ -37,7 +37,7 @@ class MiaChatTestRequest(BaseModel):
 def get_account_context(session_id: str, db: Session) -> Dict[str, Any]:
     """Get account context from session using proper session service"""
     try:
-        from backend.services.session_service import SessionService
+        from services.session_service import SessionService
         session_service = SessionService()
         session_service.db = db
 
@@ -57,7 +57,7 @@ def get_account_context(session_id: str, db: Session) -> Dict[str, Any]:
             raise ValueError(f"Account not found for session: {session_id}")
             
         return {
-            "user_id": session.google_user_id if session else "106540664695114193744",
+            "user_id": session.google_user_id if session else os.getenv("DEV_USER_ID", "106540664695114193744"),
             "account_id": account.account_id,
             "account_name": account.account_name,
             "google_ads_id": account.google_ads_id,
@@ -604,7 +604,7 @@ Respond naturally as if speaking to a business owner. Use ONLY the campaign data
 
         # Use the existing Claude agent system (same as other endpoints)
         print(f"[MIA-CHAT-TEST] Loading Claude agent...")
-        from backend.services.claude_agent import get_claude_intent_agent
+        from services.claude_agent import get_claude_intent_agent
         claude_agent = await get_claude_intent_agent()
         
         print(f"[MIA-CHAT-TEST] Sending to Claude...")

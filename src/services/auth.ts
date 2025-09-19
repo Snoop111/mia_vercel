@@ -85,7 +85,6 @@ class AuthService {
       }
       
       // Step 4: Desktop - redirect to Google OAuth
-      console.log('📱 Redirecting to Google OAuth...')
       window.location.href = data.auth_url
       
       return null // Will redirect, so no immediate return
@@ -97,7 +96,6 @@ class AuthService {
 
   async logout(): Promise<void> {
     try {
-      console.log('🚪 Regular logout - clearing local session but preserving auth for quick re-login')
       
       // Call new smart logout endpoint
       const response = await fetch('/api/oauth/google/logout', {
@@ -108,13 +106,11 @@ class AuthService {
       })
       
       const result = await response.json()
-      console.log('Logout response:', result)
       
       // Clear local session
       this.session = null
       localStorage.removeItem('mia_session')
       
-      console.log('✅ Regular logout completed')
     } catch (error) {
       console.error('Logout error:', error)
       // Always clear local session even on error
@@ -125,7 +121,6 @@ class AuthService {
 
   async forceLogoutAndClearTokens(): Promise<void> {
     try {
-      console.log('💥 Force logout - complete authentication reset')
       
       // Clear all local storage items related to auth
       localStorage.removeItem('mia_session')
@@ -144,9 +139,7 @@ class AuthService {
       })
       
       const result = await response.json()
-      console.log('Force logout response:', result)
       
-      console.log('✅ Complete authentication reset completed')
     } catch (error) {
       console.error('Force logout error:', error)
       // Still clear local data on error
@@ -174,12 +167,10 @@ class AuthService {
       })
       
       if (!response.ok) {
-        console.log('🔍 Auth status: Response not OK, status:', response.status)
         return null
       }
       
       const data = await response.json()
-      console.log('🔍 Auth status response:', data)
       
       if (data.authenticated && data.user_info) {
         const user: AuthUser = {
@@ -188,11 +179,9 @@ class AuthService {
           needsSetup: !this.hasCompletedSetup()
         }
         
-        console.log('✅ Auth status: User authenticated:', user.email)
         return user
       }
       
-      console.log('❌ Auth status: Not authenticated or missing user_info')
       return null
     } catch (error) {
       console.error('Auth status check error:', error)

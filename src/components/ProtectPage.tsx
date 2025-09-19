@@ -41,21 +41,17 @@ const ProtectPage = ({ onBack, question = "What needs protecting?", isLoading = 
 
   // Fetch data when component mounts if not provided
   useEffect(() => {
-    console.log('🎯 [PROTECT-PAGE] Mount with data:', !!data)
     if (data) {
       // Use pre-loaded data
-      console.log('✨ [PROTECT-PAGE] Using pre-loaded data')
       setProtectData(data)
       setLoading(false)
     } else if (question) {
       // Fallback to fetch if no pre-loaded data
-      console.log('⚡ [PROTECT-PAGE] No pre-loaded data, fetching...')
       fetchProtectData()
     }
   }, [data, question])
 
   const fetchProtectData = async () => {
-    console.log('🔄 [PROTECT-PAGE] Starting data fetch...')
     setLoading(true)
     setError(null)
     try {
@@ -63,7 +59,6 @@ const ProtectPage = ({ onBack, question = "What needs protecting?", isLoading = 
       const session = authService.getSession()
       const selectedAccount = session?.selectedAccount
       
-      console.log('📤 [PROTECT-PAGE] Making API call with selected account:', selectedAccount?.name || 'No account selected')
       const response = await fetch('/api/fix-data', {
         method: 'POST',
         headers: {
@@ -78,16 +73,12 @@ const ProtectPage = ({ onBack, question = "What needs protecting?", isLoading = 
         }),
       })
       
-      console.log('📡 [PROTECT-PAGE] API response status:', response.status)
       const result = await response.json()
-      console.log('📋 [PROTECT-PAGE] API result:', result)
       
       if (result.success && result.data) {
-        console.log('✅ [PROTECT-PAGE] Setting protect data:', result.data.source)
         setProtectData(result.data)
         setError(null)
       } else {
-        console.log('❌ [PROTECT-PAGE] API failed:', result)
         setError('Unable to load protection data. Please try again.')
         setProtectData(getErrorFallbackData())
       }
@@ -96,7 +87,6 @@ const ProtectPage = ({ onBack, question = "What needs protecting?", isLoading = 
       setError('Connection error. Please check your connection.')
       setProtectData(getErrorFallbackData())
     } finally {
-      console.log('🏁 [PROTECT-PAGE] Fetch complete, setting loading to false')
       setLoading(false)
     }
   }

@@ -10,9 +10,9 @@ import time
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 
-from backend.database import get_db
-from backend.models.user_profile import AccountMapping, UserProfile, AuthSession
-from backend.services.session_service import SessionService
+from database import get_db
+from models.user_profile import AccountMapping, UserProfile, AuthSession
+from services.session_service import SessionService
 
 router = APIRouter()
 
@@ -269,7 +269,7 @@ async def bypass_login(request: Request, db: Session = Depends(get_db)):
 
         # Step 1: Ensure account mappings exist
         try:
-            from backend.models.user_profile import AccountMapping
+            from models.user_profile import AccountMapping
             account_count = db.query(AccountMapping).filter(AccountMapping.is_active == True).count()
 
             if account_count == 0:
@@ -321,7 +321,7 @@ async def bypass_login(request: Request, db: Session = Depends(get_db)):
         test_user_id = "106540664695114193744"  # Trystin's Google user ID
 
         # Create or update user profile for bypass
-        from backend.models.user_profile import UserProfile
+        from models.user_profile import UserProfile
         profile = db.query(UserProfile).filter(UserProfile.google_user_id == test_user_id).first()
 
         if not profile:

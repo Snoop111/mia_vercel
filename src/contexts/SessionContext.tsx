@@ -116,7 +116,6 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
           isLoading: false
         }))
 
-        console.log('[SESSION] Initialized with session ID:', sessionId)
       } catch (error) {
         console.error('[SESSION] Initialization error:', error)
         setState(prev => ({
@@ -164,7 +163,6 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
 
               // Complete OAuth by creating database session
               try {
-                console.log('[SESSION] Completing OAuth and creating database session...')
                 const completeResponse = await fetch('/api/oauth/google/complete', {
                   method: 'POST',
                   headers: {
@@ -177,7 +175,6 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
                 }
 
                 const completeData = await completeResponse.json()
-                console.log('[SESSION] OAuth complete response:', completeData)
               } catch (error) {
                 console.error('[SESSION] OAuth complete error:', error)
                 setState(prev => ({
@@ -296,12 +293,10 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
 
   const refreshAccounts = async (): Promise<void> => {
     try {
-      console.log('[SESSION] Fetching accounts from /api/accounts/available')
       const response = await fetch('/api/accounts/available')
 
       if (response.ok) {
         const data = await response.json()
-        console.log('[SESSION] Received accounts:', data.accounts?.length || 0)
         setState(prev => ({
           ...prev,
           availableAccounts: data.accounts || []
@@ -323,7 +318,6 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
     setState(prev => ({ ...prev, isLoading: true, error: null }))
 
     try {
-      console.log('[SESSION] Selecting account:', accountId, 'with session:', state.sessionId)
 
       const response = await fetch('/api/accounts/select', {
         method: 'POST',
@@ -339,11 +333,9 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
 
       if (response.ok) {
         const data = await response.json()
-        console.log('[SESSION] Account selection API response:', data)
 
         // Find the full account details
         const account = state.availableAccounts.find(acc => acc.id === accountId)
-        console.log('[SESSION] Setting selected account:', account?.name)
 
         setState(prev => ({
           ...prev,

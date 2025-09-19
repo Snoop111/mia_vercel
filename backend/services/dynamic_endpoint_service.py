@@ -6,9 +6,9 @@ Replaces hardcoded account logic throughout the system
 from typing import Dict, Any, Optional, Tuple
 from datetime import datetime, timedelta
 
-from backend.services.session_service import session_service
-from backend.services.adk_mcp_integration import get_adk_marketing_agent
-from backend.models.user_profile import UserProfile
+from services.session_service import session_service
+from services.adk_mcp_integration import get_adk_marketing_agent
+from models.user_profile import UserProfile
 
 
 class DynamicEndpointService:

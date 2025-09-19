@@ -14,8 +14,8 @@ from .claude_agent import get_claude_intent_agent
 
 # Database imports for account mapping
 from sqlalchemy.orm import Session
-from backend.database import SessionLocal
-from backend.models.user_profile import AccountMapping
+from database import SessionLocal
+from models.user_profile import AccountMapping
 
 
 class ADKMarketingAgent:

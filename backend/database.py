@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from backend.config import settings
+from config import settings
 
 engine = create_engine(
     settings.DATABASE_URL,
@@ -21,8 +21,8 @@ def get_db():
 # Create tables
 def init_db():
     # Import all models to ensure they're registered with Base
-    from backend.models.chat import ChatHistory, UserSession
-    from backend.models.session import ChatSession
-    from backend.models.creative import AdCreative, CreativeInsight
-    from backend.models.user_profile import UserProfile, AuthSession, UserActivity, AccountMapping
+    from models.chat import ChatHistory, UserSession
+    from models.session import ChatSession
+    from models.creative import AdCreative, CreativeInsight
+    from models.user_profile import UserProfile, AuthSession, UserActivity, AccountMapping
     Base.metadata.create_all(bind=engine)

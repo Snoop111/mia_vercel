@@ -18,10 +18,10 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
-from backend.services.adk_mcp_integration import get_adk_marketing_agent
-from backend.services.creative_import import get_creative_insights
-from backend.database import SessionLocal, get_db
-from backend.models.user_profile import AccountMapping
+from services.adk_mcp_integration import get_adk_marketing_agent
+from services.creative_import import get_creative_insights
+from database import SessionLocal, get_db
+from models.user_profile import AccountMapping
 
 router = APIRouter()
 
@@ -38,7 +38,7 @@ class GrowthDataRequest(BaseModel):
 def get_account_context(session_id: str, db: Session) -> Dict[str, Any]:
     """Get account context from session using proper session service"""
     try:
-        from backend.services.session_service import SessionService
+        from services.session_service import SessionService
         session_service = SessionService()
         session_service.db = db
 
@@ -379,7 +379,7 @@ CAMPAIGN DATA (YOUR ONLY DATA SOURCE):
 Provide specific growth recommendations focusing on scaling winners and budget reallocation opportunities."""
 
         # Use same Claude agent system as chat endpoint
-        from backend.services.claude_agent import get_claude_intent_agent
+        from services.claude_agent import get_claude_intent_agent
         claude_agent = await get_claude_intent_agent()
         
         headers = {

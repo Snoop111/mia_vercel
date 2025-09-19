@@ -41,21 +41,17 @@ const GrowthPage = ({ onBack, question = "Where can we grow?", isLoading = false
 
   // Fetch data when component mounts if not provided
   useEffect(() => {
-    console.log('🎯 [GROWTH-PAGE] Mount with data:', !!data)
     if (data) {
       // Use pre-loaded data
-      console.log('✨ [GROWTH-PAGE] Using pre-loaded data')
       setGrowthData(data)
       setLoading(false)
     } else if (question) {
       // Fallback to fetch if no pre-loaded data
-      console.log('⚡ [GROWTH-PAGE] No pre-loaded data, fetching...')
       fetchGrowthData()
     }
   }, [data, question])
 
   const fetchGrowthData = async () => {
-    console.log('🔄 [GROWTH-PAGE] Starting data fetch...')
     setLoading(true)
     setError(null)
     try {
@@ -63,7 +59,6 @@ const GrowthPage = ({ onBack, question = "Where can we grow?", isLoading = false
       const session = authService.getSession()
       const selectedAccount = session?.selectedAccount
       
-      console.log('📤 [GROWTH-PAGE] Making API call with selected account:', selectedAccount?.name || 'No account selected')
       const response = await fetch('/api/growth-data', {
         method: 'POST',
         headers: {
@@ -78,16 +73,12 @@ const GrowthPage = ({ onBack, question = "Where can we grow?", isLoading = false
         }),
       })
       
-      console.log('📡 [GROWTH-PAGE] API response status:', response.status)
       const result = await response.json()
-      console.log('📋 [GROWTH-PAGE] API result:', result)
       
       if (result.success && result.data) {
-        console.log('✅ [GROWTH-PAGE] Setting growth data:', result.data.source)
         setGrowthData(result.data)
         setError(null)
       } else {
-        console.log('❌ [GROWTH-PAGE] API failed:', result)
         setError('Unable to load marketing data. Please try again.')
         setGrowthData(getErrorFallbackData())
       }
@@ -96,7 +87,6 @@ const GrowthPage = ({ onBack, question = "Where can we grow?", isLoading = false
       setError('Connection error. Please check your connection.')
       setGrowthData(getErrorFallbackData())
     } finally {
-      console.log('🏁 [GROWTH-PAGE] Fetch complete, setting loading to false')
       setLoading(false)
     }
   }
