@@ -9,8 +9,9 @@ class Settings:
     APP_ENV = os.getenv("APP_ENV", "development")
     SECRET_KEY = os.getenv("SECRET_KEY", "change-this-in-production")
 
-    # Database
-    DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./backend/mia.db")
+    # Database - Use absolute path based on current file location
+    _current_dir = os.path.dirname(os.path.abspath(__file__))
+    DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{os.path.join(_current_dir, 'mia.db')}")
 
     # Anthropic API
     ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")

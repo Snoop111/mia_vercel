@@ -20,7 +20,11 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
-      "Bash(git pull:*)"
+      "Bash(git pull:*)",
+      "Read(//home/josh/mia_vercel/src/contexts/**)",
+      "Read(//home/josh/mia_vercel/src//**)",
+      "Bash(sqlite3:*)",
+      "Read(//home/josh/mia_vercel/**)"
     ],
     "deny": [],
     "ask": []
