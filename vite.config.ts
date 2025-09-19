@@ -27,15 +27,18 @@ export default defineConfig({
     watch: {
       ignored: ['**/backend/**', '**/.venv/**', '**/node_modules/**'] // Exclude backend and Python venv from file watching
     },
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8002',
-        changeOrigin: true,
-        configure: (_proxy, _options) => {
-          // Updated to match current backend port (8002)
-        }
-      },
-    },
+    // Proxy only for local development - removed for production deployment
+    ...(process.env.NODE_ENV !== 'production' && {
+      proxy: {
+        '/api': {
+          target: 'http://localhost:8002',
+          changeOrigin: true,
+          configure: (_proxy, _options) => {
+            // Updated to match current backend port (8002)
+          }
+        },
+      }
+    }),
     allowedHosts: true
   },
   build: {
