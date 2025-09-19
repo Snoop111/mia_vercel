@@ -408,5 +408,8 @@ async def get_creative_summary(account_id: str = "dfsa", db: Session = Depends(g
 
 if __name__ == "__main__":
     import uvicorn
-    # Run on port 8002 to match existing configuration
-    uvicorn.run(app, host="127.0.0.1", port=8002)
+    # Use PORT environment variable for DigitalOcean App Platform
+    port = int(os.environ.get("PORT", 8002))
+    # Listen on all interfaces for DigitalOcean deployment
+    host = os.environ.get("HOST", "0.0.0.0")
+    uvicorn.run(app, host=host, port=port)

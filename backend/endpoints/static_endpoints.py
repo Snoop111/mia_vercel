@@ -14,6 +14,11 @@ async def health_check():
     """Basic health check endpoint"""
     return {"status": "healthy", "message": "MIA Marketing Intelligence Agent is running"}
 
+@router.get("/")
+async def root_health_check():
+    """Root health check endpoint for DigitalOcean App Platform"""
+    return {"status": "healthy", "message": "MIA Marketing Intelligence Agent is running", "service": "mia-backend"}
+
 @router.get("/auth-test", response_class=HTMLResponse)
 async def auth_test_page():
     """Simple auth test page for debugging authentication flow"""
